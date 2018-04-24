@@ -1,0 +1,18 @@
+{
+  "name": "save-the-env",
+  "version": "1.0.0",
+  "description": "demo server app",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js && cd web-client && npm start",
+    "start": "node index.js",
+    "heroku-postbuild": "cd web-client && npm install --only=dev && npm install && npm run build"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "mongoose": "^5.0.3"
+  }
+}
