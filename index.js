@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 })); 
 // app.use(express.static(path.join(__dirname, 'web-client/build')));
 
-mongoose.connect('');
+mongoose.connect('mongodb://Admin:Admin@env-shard-00-00-1z8ev.mongodb.net:27017,env-shard-00-01-1z8ev.mongodb.net:27017,env-shard-00-02-1z8ev.mongodb.net:27017/iotplat?ssl=true&replicaSet=Env-shard-0&authSource=admin');
 
 var Schema = mongoose.Schema;
 
