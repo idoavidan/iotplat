@@ -1,12 +1,11 @@
 {
-  "name": "save-the-env",
+  "name": "iotplat",
   "version": "1.0.0",
   "description": "demo server app",
   "main": "index.js",
   "scripts": {
-    "test": "node index.js && cd web-client && npm start",
     "start": "node index.js",
-    "heroku-postbuild": "cd web-client && npm install --only=dev && npm install && npm run build"
+    "heroku-postbuild": "node index.js"
   },
   "author": "",
   "license": "ISC",
