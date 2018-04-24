@@ -15,7 +15,10 @@ var Schema = mongoose.Schema;
 
 var FeedSchema = new Schema(
     {
-        name: {type: String, required: true, max: 99}
+        name: {type: String, required: true, max: 99},
+        sensor: {type: String, required: true, max: 99},
+        data : {type: Number, required: true},
+        time : {type: Number, required: true},
     }
 );
 
@@ -26,10 +29,13 @@ var MyModel = db.model('Feed', FeedSchema);
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 app.post('/feed', function (req, res) {
-    // input name.email.telephone.description.x.y.address.photoBASE64 
-    // system time ObjectId ip
+
     var instance = new MyModel();
     instance.name = req.body.name;
+    instance.sensor = req.body.sensor;
+    instance.data = req.body.data;
+    instance.time = req.body.time;
+    
     instance.save(function (err, feed) {
         res.json(feed._id)        
     });
