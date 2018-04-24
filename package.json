@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "test": "nodemon index.js",
     "heroku-postbuild": "node index.js"
   },
   "author": "",
