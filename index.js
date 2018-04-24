@@ -15,7 +15,7 @@ var Schema = mongoose.Schema;
 
 var FeedSchema = new Schema(
     {
-        name: {type: String, required: true, max: 100}
+        name: {type: String, required: true, max: 99}
     }
 );
 
