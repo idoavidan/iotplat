@@ -7,9 +7,12 @@ const path = require('path');
 //git check
 var app = express()
 app.use(bodyParser.json())
-app.use(express.static(path.join(__dirname, 'web-client/build')));
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+    extended: true
+})); 
+// app.use(express.static(path.join(__dirname, 'web-client/build')));
 
-mongoose.connect('mongodb://Admin:Admin@env-shard-00-00-1z8ev.mongodb.net:27017,env-shard-00-01-1z8ev.mongodb.net:27017,env-shard-00-02-1z8ev.mongodb.net:27017/iotplat?ssl=true&replicaSet=Env-shard-0&authSource=admin');
+mongoose.connect('');
 
 var Schema = mongoose.Schema;
 
@@ -35,11 +38,31 @@ app.post('/feed', function (req, res) {
     instance.sensor = req.body.sensor;
     instance.data = req.body.data;
     instance.time = req.body.time;
-
+    
     instance.save(function (err, feed) {
         res.json(feed._id)        
     });
     // res.send('Hello World!')
+})
+
+app.post('/feedsByIndex', function(req,res){
+    var query = {};
+    query[req.body.index] = req.body.value;
+    MyModel.find(query).then(function(x){
+        res.json(x)
+    })
+})
+
+app.post('/feedsByTime', function(req,res){
+    var query = {
+        time : { 
+            $gt : req.body.from, 
+            $lt : req.body.to 
+        }
+    };
+    MyModel.find(query).then(function(x){
+        res.json(x)
+    })
 })
 
 // app.get('/', function(req,res){
@@ -47,23 +70,23 @@ app.post('/feed', function (req, res) {
 // })
 
 // app.post('/getAllReport', function(req,res){
-//     MyModel.find().then(function(x){
-//         let naw = [{}];
-//         var i = 0;
-//         x.forEach(function(y){
-//             naw[i] = { Status : y._status , 
-//                        Category : y.category , 
-//                        Description : y.desc,
-//                        Name : y.name,  
-//                        Email : y.email,
-//                        Date : y._dateTime,
-//                        Latitude : y.y,
-//                        Longitude : y.x,
-//             }
-//             i = i + 1;
-//         })
-//         return naw;
-//     }).then(x => res.json(x));
+    // MyModel.find().then(function(x){
+    //     let naw = [{}];
+    //     var i = 0;
+    //     x.forEach(function(y){
+    //         naw[i] = { Status : y._status , 
+    //                    Category : y.category , 
+    //                    Description : y.desc,
+    //                    Name : y.name,  
+    //                    Email : y.email,
+    //                    Date : y._dateTime,
+    //                    Latitude : y.y,
+    //                    Longitude : y.x,
+    //         }
+    //         i = i + 1;
+    //     })
+    //     return naw;
+    // }).then(x => res.json(x));
 // })
 
 // app.post('/getReport', function(req,res){
