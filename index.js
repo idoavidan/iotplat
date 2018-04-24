@@ -60,12 +60,12 @@ app.post('/getAllReport', function(req,res){
     }).then(x => res.json(x));
 })
 
-app.post('/getReport', function(req,res){
-    MyModel.findById(req.body.id).then(x => res.json(x));
-})
+// app.post('/getReport', function(req,res){
+//     MyModel.findById(req.body.id).then(x => res.json(x));
+// })
 
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname+'/web-client/build/index.html'));
+    res.sendFile(path.join(__dirname+'/public/index.html'));
 });
 
 app.listen(process.env.PORT || 8000, function () {
