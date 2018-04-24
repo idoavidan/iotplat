@@ -35,7 +35,7 @@ app.post('/feed', function (req, res) {
     instance.sensor = req.body.sensor;
     instance.data = req.body.data;
     instance.time = req.body.time;
-    
+
     instance.save(function (err, feed) {
         res.json(feed._id)        
     });
@@ -46,25 +46,25 @@ app.post('/feed', function (req, res) {
 //     res.send("wowooooooooo")
 // })
 
-app.post('/getAllReport', function(req,res){
-    MyModel.find().then(function(x){
-        let naw = [{}];
-        var i = 0;
-        x.forEach(function(y){
-            naw[i] = { Status : y._status , 
-                       Category : y.category , 
-                       Description : y.desc,
-                       Name : y.name,  
-                       Email : y.email,
-                       Date : y._dateTime,
-                       Latitude : y.y,
-                       Longitude : y.x,
-            }
-            i = i + 1;
-        })
-        return naw;
-    }).then(x => res.json(x));
-})
+// app.post('/getAllReport', function(req,res){
+//     MyModel.find().then(function(x){
+//         let naw = [{}];
+//         var i = 0;
+//         x.forEach(function(y){
+//             naw[i] = { Status : y._status , 
+//                        Category : y.category , 
+//                        Description : y.desc,
+//                        Name : y.name,  
+//                        Email : y.email,
+//                        Date : y._dateTime,
+//                        Latitude : y.y,
+//                        Longitude : y.x,
+//             }
+//             i = i + 1;
+//         })
+//         return naw;
+//     }).then(x => res.json(x));
+// })
 
 // app.post('/getReport', function(req,res){
 //     MyModel.findById(req.body.id).then(x => res.json(x));
