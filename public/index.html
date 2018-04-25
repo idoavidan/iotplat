@@ -1,1 +1,73 @@
-<p>hi</p>
+<html>
+<head>
+	<script src="./js/Chart.min.js"></script>
+<style>
+.app {
+	display:grid;
+	grid-template-areas : 'menu'
+	'main'
+	'footer';
+	text-transform : capitalize;
+	text-align : center;
+	width:90%;
+	margin-left:5%;
+}
+.appMenu{
+	grid-area:menu;	
+	display:grid;
+	grid-template-columns: repeat(7, 1fr);
+    text-decoration: none;
+    font-weight: bold;
+}
+.appMenu  select {
+	width :	100%;
+	min-height:30px;
+	font-size: 150%;
+	border-radius: 12px;
+	border:solid;
+	border-width:1px;
+	color: white;
+	background-color:LightSlateGray ;
+	padding:0px;
+	margin-top:0px;
+}
+.appMain{
+	grid-area:main;	
+	display:grid;
+    text-decoration: none;
+    font-weight: bold;
+}
+.appMain canvas{
+	width:80%;
+	margin-left:10%;
+	text-transform : capitalize;
+}
+</style>
+</head>
+<body onload="start()">
+<div class="app">
+	<div class="appMenu">
+	<label>device groups</label>
+	<label>sensors</label>
+	<label>from</label>
+	<label>to</label>
+	<label>interval</label>
+	<label>chart</label>
+	<label>chart color</label>
+	<select id="groupSelect" onchange="changeGroup(this.value)"><option selected value></option></select>
+	<select id="sensorSelect" onchange="changeSensor(this.value)"><option selected value></option>
+	</select>
+	<input id="fromSelect" type="date" placeholder="from"></input>
+	<input id="toSelect" type="date" placeholder="to"></input>
+	<select id="intervalSelect" onchange="changeSensor(el('sensorSelect').value)"><option selected value></option></select>
+	<select id="chartSelect" onchange="changeSensor(el('sensorSelect').value)"><option selected value></option></select>
+	<input id="colorSelect" type="color" value="#ff0080" onchange="changeSensor(el('sensorSelect').value)"></input>
+	</div>
+	<div class="appMain">
+		<canvas id="mainChart"></canvas>
+	</div>
+<div>
+</body>
+<script src="./js/app.js">
+</script>
+</html>
