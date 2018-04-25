@@ -9,9 +9,10 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true
 })); 
 // app.use(express.static(path.join(__dirname, 'web-client/build')));
-
-mongoose.connect('');
-
+//db connection
+var config = require('./private/config.json');
+const mongoose = require('mongoose');
+mongoose.connect(config.conn);
 var Schema = mongoose.Schema;
 var FeedSchema = new Schema({
 	name: {type: String, required: true, max: 99},
@@ -50,7 +51,6 @@ app.post('/feedsByIndex', function(req,res){
     var query = {};
     query[req.body.index] = req.body.value;	
     MyModel.find(query).then(function(x){
-		console.log(x)
         res.json(x)
     });
 })

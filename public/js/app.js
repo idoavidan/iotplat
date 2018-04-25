@@ -58,26 +58,31 @@ function changeGroup(data){
 var x;
 function changeSensor(data){
 	if(data){
-		getData({"path":"feedsByIndex","index":el("groupSelect").value,"value":data});
+		getData({"path":"feedsByIndex","index":"sensor","value":data});
 	}
 }
 
+var mainChart;
 function showChart(msg){
+	console.log(msg)
 	var labels=[];
 	var data=[];
-	var type=el("chartSelect").value ? el("chartSelect").value :'line'
+	var type=el("chartSelect").value ? el("chartSelect").value :'line';
+	
     msg.map(function(o){
-		labels.push(o.time);
+		d = new Date(o.time*1000); // The 0
+		labels.push(String(d.getHours()).padStart(2,"0")+':'+String(d.getMinutes()).padStart(2,"0")+':'+String(d.getSeconds()).padStart(2,"0"));
 		data.push(o.data);
 	});
 	el("mainChart").innerHTML="";
+	if (mainChart){console.log(mainChart);mainChart.destroy()};
 	var ctx = el("mainChart").getContext('2d');
-	var mainChart = new Chart(ctx, {
+	mainChart= new Chart(ctx, {
 	type: type,
 		data: {
 		labels: labels,
 		datasets: [{
-			type: 'line',
+			type: el('chartSelect').value,
 			fill:false,
 			label: el("groupSelect").value+'-'+el("sensorSelect").value,
 			data: data,
@@ -86,7 +91,7 @@ function showChart(msg){
 		}]
 		},
 		options: {
-			responsive: false,
+			responsive: true,
 			legend: {
 				labels: {
 				fontColor: "black",
@@ -103,7 +108,7 @@ function showChart(msg){
 		ticks: {
 			fontColor: "black",
 			fontSize: 14,
-			stepSize: 1,
+			stepSize: 10,
 			beginAtZero: true
 		}
 	}]
