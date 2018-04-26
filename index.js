@@ -1,7 +1,8 @@
 var express = require('express')
 var bodyParser = require('body-parser')
 const path = require('path');
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+var config = require('./private/config.json');
 
 //git check
 var app = express()
@@ -9,11 +10,11 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true
 })); 
-// app.use(express.static(path.join(__dirname, 'web-client/build')));
+
 //db connection
-var config = require('./private/config.json');
-const mongoose = require('mongoose');
+
 mongoose.connect(config.conn);
+
 var Schema = mongoose.Schema;
 var FeedSchema = new Schema({
 	name: {type: String, required: true, max: 99},
@@ -21,8 +22,11 @@ var FeedSchema = new Schema({
 	data : {type: Number, required: true},
 	time : {type: Number, required: true},
 });
+
 var db = mongoose.connection;
+
 var MyModel = db.model('Feed', FeedSchema);
+
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 //main app page
 app.get('/', (req, res) => {
@@ -33,7 +37,8 @@ app.get('*', (req, res) => {
 });
 
 //device data listener
-var appData = {"reqParams":["name","sensor","data","time"],"port":8000};
+var appData = config.appData;
+
 app.post('/feed', function (req, res) {
     var instance = new MyModel();	
 	appData.reqParams.map( o => {
