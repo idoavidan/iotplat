@@ -26,6 +26,23 @@ router.post('/feedsByTime', function(req,res){
     })
 })
 
+router.post('/names',function(req,res){
+	MyModel.distinct("name").then(function(data){
+		res.send(data)
+	});
+})
+
+router.post('/sensors',function(req,res){
+	MyModel.distinct("sensor").then(function(data){
+		res.send(data)
+	});
+})
+
+router.post('/groups',function(req,res){
+	MyModel.distinct("group").then(function(data){
+		res.send(data)
+	});
+})
 
 router.post('/general', function(req,res){
 	if(req.body.index === 'name'){

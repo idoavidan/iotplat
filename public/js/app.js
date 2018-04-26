@@ -40,6 +40,7 @@ function getData(data){
 	}
 		xhr.send(JSON.stringify(data)); 
 }
+
 function start(){
 	getData({"el":"groupSelect","path":"query/general","index":"name"});
 	appData.interval.map(o=>{
