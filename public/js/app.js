@@ -28,7 +28,7 @@ function getData(data){
 				if(data.el==="groupSelect"){appData[data.el].push(o);appData.sensorSelect[o]=[]}
 				else{appData.sensorSelect[data.value].push(o)};
 			});
-		} else if (data.path==="feedsByIndex" && xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200  && xhr.response.lenght!==0){
+		} else if (data.path==="query/feedsByIndex" && xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200  && xhr.response.lenght!==0){
 			showChart(JSON.parse(xhr.response));
 		} else if (xhr.status !== 200){
 			alert('error, please check console');
@@ -41,7 +41,7 @@ function getData(data){
 		xhr.send(JSON.stringify(data)); 
 }
 function start(){
-	getData({"el":"groupSelect","path":"general","index":"name"});
+	getData({"el":"groupSelect","path":"query/general","index":"name"});
 	appData.interval.map(o=>{
 		el("intervalSelect").innerHTML+='<option>'+o+'</option>';
 	});
@@ -52,13 +52,13 @@ function start(){
 
 function changeGroup(data){
 	if(data){
-		getData({"el":"sensorSelect","path":"general","index":"sensor","value":data});
+		getData({"el":"sensorSelect","path":"query/general","index":"sensor","value":data});
 	}
 }
 var x;
 function changeSensor(data){
 	if(data){
-		getData({"path":"feedsByIndex","index":"sensor","value":data});
+		getData({"path":"query/feedsByIndex","index":"sensor","value":data});
 	}
 }
 
