@@ -5,6 +5,7 @@ var appData = config.appData;
 
 var MyModel = require('../models/feedModel');
 
+
 router.post('/feedsByIndex', function(req,res){
     var query = {};
     query[req.body.index] = req.body.value;	
