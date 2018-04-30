@@ -1,33 +1,20 @@
-var appData={"groupSelect":[],"sensorSelect":{},
-"interval":["minute","5 minutes","30 minutes","1 hour","2 hours","4 hours","8 hours","day","week","month","year"],
-"chart":["line","bar"]}
+var appData={"path":"query","selectGroup":[],"selectDevice":[],"selectSensor":[],
+"selectInterval":["minute","5 minutes","30 minutes","1 hour","2 hours","4 hours","8 hours","day","week","month","year"],
+"selectChart":["line","bar"]}
+
 function el(data){
 	return document.getElementById(data);
 };
+
 //request data 
-function getData(data){
-	if (data.el && data.el==="groupSelect" && appData.groupSelect.length!==0){
-		return;
-	} else if(data.el && data.el==="sensorSelect" && appData.sensorSelect[data.value].length!==0){
-		el(data.el).innerHTML="<option selected value>Sensors </option>";
-		appData.sensorSelect[data.value].map(function(o){
-			el(data.el).innerHTML+='<option>'+o+'</option>';
-		})
-		return;
-	} else if(data.el && data.el==="sensorSelect" && appData.sensorSelect[data.value].length===0){
-		el(data.el).innerHTML="";
-	};
+function getData(data,callback){
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST", data.path, true);
+	xhr.open("POST", appData.path+'/'+data.path, true);
 	//Send the proper header information along with the request
 	xhr.setRequestHeader("Content-type", "application/json");
 	xhr.onload = function(e) {//Call a function when the state changes.
-		if(data.el && xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200  && xhr.response.lenght!==0) {
-			JSON.parse(xhr.response).map(function (o){
-				el(data.el).innerHTML+='<option>'+o+'</option>';
-				if(data.el==="groupSelect"){appData[data.el].push(o);appData.sensorSelect[o]=[]}
-				else{appData.sensorSelect[data.value].push(o)};
-			});
+		if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200  && xhr.response.lenght!==0) {
+			callback(JSON.parse(xhr.response));
 		} else if (data.path==="query/feedsByIndex" && xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200  && xhr.response.lenght!==0){
 			showChart(JSON.parse(xhr.response));
 		} else if (xhr.status !== 200){
@@ -41,39 +28,60 @@ function getData(data){
 		xhr.send(JSON.stringify(data)); 
 }
 
+function gen(data){
+	el(data.el).innerHTML='<option></option>';
+	var len = appData[data.el].length ? appData[data.el].length : Object.keys(appData[data.el]).length;
+	if (len!==0 && data.el!=='selectSensor'){
+		appData[data.el].map(o=>{
+			el(data.el).innerHTML+='<option>'+o+'</option>';
+		});
+	}
+	else{
+		getData({"path":data.path,"data":data},function (res){
+			appData[data.el]=[];
+			res.map(o=>{
+				el(data.el).innerHTML+='<option>'+o+'</option>';
+				appData[data.el].push(o);
+			})
+		});
+	}
+};
 function start(){
-	getData({"el":"groupSelect","path":"query/general","index":"name"});
-	appData.interval.map(o=>{
-		el("intervalSelect").innerHTML+='<option>'+o+'</option>';
-	});
-	appData.chart.map(o=>{
-		el("chartSelect").innerHTML+='<option>'+o+'</option>';
-	})
+	gen({"path":"groups","el":"selectGroup"});
+	gen({"path":"names","el":"selectDevice"});
+	gen({"el":"selectInterval"});
+	gen({"el":"selectChart"});	
 }
 
 function changeGroup(data){
-	if(data){
-		getData({"el":"sensorSelect","path":"query/general","index":"sensor","value":data});
-	}
-}
-var x;
+	return;
+};
+function changeDevice(data){
+	gen({"path":"general","el":"selectSensor","index":"sensor","value":data});
+};
 function changeSensor(data){
 	if(data){
-		getData({"path":"query/feedsByIndex","index":"sensor","value":data});
+		getData({"path":"feedsByIndex","index":"sensor","value":data},function(res){
+			showChart(res);
+		});
 	}
 }
-
 var mainChart;
 function showChart(msg){
-	console.log(msg)
 	var labels=[];
 	var data=[];
-	var type=el("chartSelect").value ? el("chartSelect").value :'line';
-	
+	var dataColor=[]
+	var type=el("selectChart").value ? el("selectChart").value :'line';
     msg.map(function(o){
 		d = new Date(o.time*1000); // The 0
 		labels.push(String(d.getHours()).padStart(2,"0")+':'+String(d.getMinutes()).padStart(2,"0")+':'+String(d.getSeconds()).padStart(2,"0"));
 		data.push(o.data);
+		if(o.data<25 || o.data >35){
+			dataColor.push("red");
+		}
+		else{
+			dataColor.push(el("selectColor").value);
+		}
 	});
 	el("mainChart").innerHTML="";
 	if (mainChart){console.log(mainChart);mainChart.destroy()};
@@ -83,11 +91,12 @@ function showChart(msg){
 		data: {
 		labels: labels,
 		datasets: [{
-			type: el('chartSelect').value,
+			type: el('selectChart').value,
 			fill:false,
-			label: el("groupSelect").value+'-'+el("sensorSelect").value,
+			label: el("selectDevice").value+'-'+el("selectSensor").value,
 			data: data,
-			backgroundColor: el("colorSelect").value,
+			pointBackgroundColor: dataColor,
+			backgroundColor: el("selectColor").value,
 			borderWidth: 1
 		}]
 		},
