@@ -1,5 +1,6 @@
 var appData={"path":"query","selectGroup":[],"selectDevice":[],"selectSensor":[],
 "selectInterval":["minute","5 minutes","30 minutes","1 hour","2 hours","4 hours","8 hours","day","week","month","year"],
+"selectIntervalVal":[60,300,1800,3600,7200,14400,28800,86400,604800,2629746,31556952],
 "selectChart":["line","bar"]}
 
 function el(data){
@@ -65,6 +66,16 @@ function changeSensor(data){
 			showChart(res);
 		});
 	}
+}
+function changeInterval(data){
+		if(data){
+			var d= Date.now();
+			console.log();
+			getData({"path":"feedsByIndex","index":"sensor","value":el("selectSensor").value,
+				"from":d/1000-appData.selectIntervalVal[data],"to":d/1000},function(res){
+					showChart(res);
+				});
+		};
 }
 var mainChart;
 function showChart(msg){

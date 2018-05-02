@@ -70,7 +70,7 @@
 	<div><img src="./img/octicons/pulse.svg"></img><label>sensors</label><select id="selectSensor" onchange="changeSensor(this.value)"><option selected value></option></select></div>	
 	<div><img src="./img/octicons/calendar.svg"><label>from</label><input id="fromSelect" type="date" placeholder="from"></input></div>
 	<div><img src="./img/octicons/calendar.svg"><label>to</label><input id="toSelect" type="date" placeholder="to"></input></div>
-	<div><img src="./img/octicons/clock.svg"><label>interval</label><select id="selectInterval" onchange="changeSensor(el('sensorSelect').value)"><option selected value></option></select></div>	
+	<div><img src="./img/octicons/clock.svg"><label>interval</label><select id="selectInterval" onchange="changeInterval(this.selectedIndex)"><option selected value></option></select></div>	
 	<div><img src="./img/octicons/graph.svg"><label>chart</label></img><select id="selectChart" onchange="changeSensor(el('sensorSelect').value)"><option selected value></option></select></div>
 	<div><img src="./img/octicons/pencil.svg"><label>chart color</label><input id="selectColor" type="color" value="#0000FF" onchange="changeSensor(el('sensorSelect').value)"></input></div>
 	</div>
