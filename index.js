@@ -1,5 +1,5 @@
-var express = require('express')
-var bodyParser = require('body-parser')
+var express = require('express');
+var bodyParser = require('body-parser');
 const path = require('path');
 const mongoose = require('mongoose');
 var config = require('./private/config.json');
@@ -31,10 +31,12 @@ app.get('*', (req, res) => {
 var appData = config.appData;
 var devices = require('./routes/deviceAPI');
 app.use('/feed', devices);
+// TODO mqtt feed
 
 //query by Index
 var devices = require('./routes/queryAPI');
 app.use('/query', devices);
+//TODO websocket query
 
 var server = app.listen(process.env.PORT ? process.env.PORT : appData.port, function () {
 	console.log('Example app listening on port '+ (process.env.PORT ? process.env.PORT : appData.port));
