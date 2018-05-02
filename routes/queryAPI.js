@@ -52,16 +52,17 @@ router.post('/groups',function(req,res){
 })
 
 router.post('/general', function(req,res){
-	if(req.body.index === 'name'){
+	var d=req.body.data;
+	if(d.index === 'name'){
 		MyModel.distinct("name").then(function(data){
 			res.send(data)
 		});
-	} else if (req.body.index === 'sensor' && req.body.value === undefined){
-		MyModel.distinct(req.body.index).then(function(data){
+	} else if (d.index === 'sensor' && d.value === undefined){
+		MyModel.distinct(d.index).then(function(data){
 			res.send(data)
 		});
-	} else if (req.body.index === 'sensor' && req.body.value !== undefined){
-		MyModel.distinct(req.body.index,{"name":req.body.value}).then(function(data){
+	} else if (d.index === 'sensor' && d.value !== undefined){
+		MyModel.distinct(d.index,{"name":d.value}).then(function(data){
 			res.send(data)
 		});
 	}
@@ -69,6 +70,5 @@ router.post('/general', function(req,res){
 		res.status(400);
 	}
 })
-
 
 module.exports = router;

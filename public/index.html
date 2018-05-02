@@ -15,7 +15,7 @@
 .appMenu{
 	grid-area:menu;	
 	display:grid;
-	grid-template-columns: repeat(7, 1fr);
+	grid-template-columns: repeat(8, 1fr);
     text-decoration: none;
     font-weight: bold;
 }
@@ -31,6 +31,22 @@
 	padding:0px;
 	margin-top:0px;
 }
+.appMenu  input {
+	width :	100%;
+	min-height:30px;
+	font-size: 150%;
+	border-radius: 12px;
+	border:solid;
+	border-width:1px;
+	color: white;
+	background-color:LightSlateGray ;
+	padding:0px;
+	margin-top:0px;
+}
+.appMenu  input[type=color] {
+	background-color:transparent;
+	border-radius: 12px;
+}
 .appMain{
 	grid-area:main;	
 	display:grid;
@@ -41,31 +57,27 @@
 	width:100%;
 	text-transform : capitalize;
 }
+<!-- label{ -->
+<!-- visibility:hidden; -->
+<!-- } -->
 </style>
 </head>
 <body onload="start()">
 <div class="app">
 	<div class="appMenu">
-	<label>device groups</label>
-	<label>sensors</label>
-	<label>from</label>
-	<label>to</label>
-	<label>interval</label>
-	<label>chart</label>
-	<label>chart color</label>
-	<select id="groupSelect" onchange="changeGroup(this.value)"><option selected value></option></select>
-	<select id="sensorSelect" onchange="changeSensor(this.value)"><option selected value></option>
-	</select>
-	<input id="fromSelect" type="date" placeholder="from"></input>
-	<input id="toSelect" type="date" placeholder="to"></input>
-	<select id="intervalSelect" onchange="changeSensor(el('sensorSelect').value)"><option selected value></option></select>
-	<select id="chartSelect" onchange="changeSensor(el('sensorSelect').value)"><option selected value></option></select>
-	<input id="colorSelect" type="color" value="#ff0080" onchange="changeSensor(el('sensorSelect').value)"></input>
+	<div><img src="./img/octicons/package.svg"></img><label>device groups</label><select id="selectGroup" onchange="changeGroup(this.value)"><option selected value></option></select></div>
+	<div><img src="./img/octicons/device-mobile.svg"></img><label><label>devices</label><select id="selectDevice" onchange="changeDevice(this.value)"><option selected value></option></select></div>
+	<div><img src="./img/octicons/pulse.svg"></img><label>sensors</label><select id="selectSensor" onchange="changeSensor(this.value)"><option selected value></option></select></div>	
+	<div><img src="./img/octicons/calendar.svg"><label>from</label><input id="fromSelect" type="date" placeholder="from"></input></div>
+	<div><img src="./img/octicons/calendar.svg"><label>to</label><input id="toSelect" type="date" placeholder="to"></input></div>
+	<div><img src="./img/octicons/clock.svg"><label>interval</label><select id="selectInterval" onchange="changeInterval(this.selectedIndex)"><option selected value></option></select></div>	
+	<div><img src="./img/octicons/graph.svg"><label>chart</label></img><select id="selectChart" onchange="changeSensor(el('sensorSelect').value)"><option selected value></option></select></div>
+	<div><img src="./img/octicons/pencil.svg"><label>chart color</label><input id="selectColor" type="color" value="#0000FF" onchange="changeSensor(el('sensorSelect').value)"></input></div>
 	</div>
 	<div class="appMain">
 		<canvas id="mainChart"></canvas>
 	</div>
-<div>
+</div>
 </body>
 <script src="./js/app.js">
 </script>
