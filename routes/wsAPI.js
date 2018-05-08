@@ -1,5 +1,7 @@
-module.exports = function(io){
-  io.on('connection', function(socket){
-    console.log('a user connected');
-  });  
+module.exports = function(io)
+{
+    io.on('connection', (client) => {
+      console.log("hi")
+    })
+
 }
