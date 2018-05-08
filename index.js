@@ -6,6 +6,8 @@ var config = require('./private/config.json');
 
 //git check
 var app = express()
+var http = require('http').Server(app);
+
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true
@@ -34,10 +36,11 @@ app.use('/feed', devices);
 //query by Index
 var devices = require('./routes/queryAPI');
 app.use('/query', devices);
-//websocket query
-var ws = require('./routes/wsAPI');
-app.use('/ws', ws);
 
+//websocket query
+var io = require('socket.io')(http);
+app.io = io;
+var ws = require('./routes/wsAPI')(app.io);
 
 
 app.get('/', (req, res) => {
