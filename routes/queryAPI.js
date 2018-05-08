@@ -38,7 +38,7 @@ router.post('/devices', function(req,res){
 })
 
 router.post('/group', function(req,res){
-	getGroup(req.query.group_id).then(x => res.json(x))
+	getGroup(req.body.group_id).then(x => res.json(x))
 })
 
 

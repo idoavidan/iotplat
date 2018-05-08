@@ -34,7 +34,12 @@ app.use('/feed', devices);
 //query by Index
 var devices = require('./routes/queryAPI');
 app.use('/query', devices);
-//TODO websocket query
+//websocket query
+var ws = require('./routes/wsAPI');
+app.use('/ws', ws);
+
+
+
 app.get('/', (req, res) => {
     res.sendFile(__dirname+'/public/index.html');
 });
