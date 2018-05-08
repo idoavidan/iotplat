@@ -11,21 +11,19 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true
 })); 
 
+
+//auth 
+app.use((req,res,next) => next());
+
 //db connection
 
 mongoose.connect(config.conn);
 var db = mongoose.connection;
 
-var MyModel = require('./models/feedModel');
+// var MyModel = require('./models/feedModel');
 
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 //main app page
-app.get('/', (req, res) => {
-    res.sendFile(__dirname+'/public/index.html');
-});
-app.get('*', (req, res) => {
-    res.sendFile(__dirname+'/public/'+req.path);
-});
 
 //device data listener
 var appData = config.appData;
@@ -37,7 +35,13 @@ app.use('/feed', devices);
 var devices = require('./routes/queryAPI');
 app.use('/query', devices);
 //TODO websocket query
+app.get('/', (req, res) => {
+    res.sendFile(__dirname+'/public/index.html');
+});
+app.get('*', (req, res) => {
+    res.sendFile(__dirname+'/public/'+req.path);
+});
 
 var server = app.listen(process.env.PORT ? process.env.PORT : appData.port, function () {
-	console.log('Example app listening on port '+ (process.env.PORT ? process.env.PORT : appData.port));
+    console.log('Example app listening on port '+ (process.env.PORT ? process.env.PORT : appData.port));
 })

@@ -3,8 +3,8 @@ var router = express.Router();
 var config = require('../private/config.json');
 var appData = config.appData;
 
-var MyModel = require('../models/feedModel');
-
+// var MyModel = require('../models/feedModel');
+var FeedModel = require('../models/feedModel');
 
 router.post('/feedsByIndex', function(req,res){
     var query = {};
@@ -15,60 +15,50 @@ router.post('/feedsByIndex', function(req,res){
             $lt : req.body.to 
 		}
 	}
-    MyModel.find(query).then(function(x){
+    FeedModel.find(query).then(function(x){
         res.json(x)
     });
 })
 
-//query by timeframe
-router.post('/feedsByTime', function(req,res){
-    var query = {
-        time : { 
-            $gt : req.body.from, 
-            $lt : req.body.to 
-        }
-    };
-    MyModel.find(query).then(function(x){
-        res.json(x)
-    })
+var GroupModel = require('../models/groupModel');
+
+function getGroup(group_id){
+	return GroupModel.findOne({group_id : group_id},
+			{_id : 0, __v : 0, "group_devices._id" : 0, "group_devices.device_sensors._id" : 0})
+}
+
+router.post('/groups', function(req,res){
+	GroupModel.find().then(x => res.json(x.map(group => group.group_id)))
 })
 
-router.post('/names',function(req,res){
-	MyModel.distinct("name").then(function(data){
-		res.send(data)
-	});
+router.post('/devices', function(req,res){
+	getGroup(req.body.group_id).then(x => res.json(x.group_devices))
 })
 
-router.post('/sensors',function(req,res){
-	MyModel.distinct("sensor").then(function(data){
-		res.send(data)
-	});
+router.get('/group', function(req,res){
+	getGroup("house").then(x => res.json(x.group_devices))
 })
 
-router.post('/groups',function(req,res){
-	MyModel.distinct("group").then(function(data){
-		res.send(data)
-	});
-})
+// router.post('/sensors', function(req,res){
+// 	const query = {group_id : req.body.group_id}
+// 	// query = {"group_devices.device_id" : req.body.device_id};	
+// 	GroupModel.findOne(query).then((x,err) => 
+// 			res.json(x.group_devices.filter(devices => devices.device_id === req.body.device_id)))
+// })
 
-router.post('/general', function(req,res){
-	var d=req.body.data;
-	if(d.index === 'name'){
-		MyModel.distinct("name").then(function(data){
-			res.send(data)
-		});
-	} else if (d.index === 'sensor' && d.value === undefined){
-		MyModel.distinct(d.index).then(function(data){
-			res.send(data)
-		});
-	} else if (d.index === 'sensor' && d.value !== undefined){
-		MyModel.distinct(d.index,{"name":d.value}).then(function(data){
-			res.send(data)
-		});
+
+router.post('/group', function(req,res){
+	var instance = new GroupModel();	
+	instance.group_id = req.body.group_id;
+	instance.group_devices = req.body.group_devices;
+	instance.save(function (err, feed) {
+	if (err) {
+		res.send(err._message);
+	} else {
+		res.json(feed._id)
 	}
-	else {
-		res.status(400);
-	}
+	});
 })
+
 
 module.exports = router;

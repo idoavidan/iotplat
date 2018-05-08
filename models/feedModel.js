@@ -1,13 +1,12 @@
 const mongoose = require('mongoose');
-
 var Schema = mongoose.Schema;
 
 var FeedSchema = new Schema({
-    group : {type: String, required : false, max : 99},
-	name: {type: String, required: true, max: 99},
-	sensor: {type: String, required: true, max: 99},
-	data : {type: Number, required: true},
+	device_id : {type: String, required : false, max : 99},
+	sensor_id : {type: String, required : false, max : 99},
 	time : {type: Number, required: true},
+	timeS : {type: Number, required: true},
+	data : {},
 });
 
 module.exports = mongoose.model('feed', FeedSchema);
