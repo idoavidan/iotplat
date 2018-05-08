@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var expressWs = require('express-ws')(app);
+var expressWs = require('express-ws')(router);
 
 router.ws('/', function(ws, req) {
     ws.on('message', function(msg) {
