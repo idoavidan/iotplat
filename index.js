@@ -42,6 +42,14 @@ app.get('/ws', (req, res) => {
     res.sendFile(__dirname+'/public/s.html');
 });
 
+app.get('/', (req, res) => {
+    res.sendFile(__dirname+'/public/index.html');
+});
+
+
+app.get('*', (req, res) => {
+    res.sendFile(__dirname+'/public/'+req.path);
+});
 
 var server = http.listen(process.env.PORT ? process.env.PORT : appData.port, function () {
     console.log('Example app listening on port '+ (process.env.PORT ? process.env.PORT : appData.port));
@@ -52,16 +60,4 @@ var io = require('socket.io')(server);
 app.set('socketio', io);
 var ws = require('./routes/wsAPI')(io);
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname+'/public/index.html');
-});
-
-// var x = ws.foo()
-// console.log(ws.foo())
-app.get('*', (req, res) => {
-    res.sendFile(__dirname+'/public/'+req.path);
-});
-// io.sockets.on('connection', function(socket){
-    // console.log(socket);
-// });
 

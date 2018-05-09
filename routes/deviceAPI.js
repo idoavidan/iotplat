@@ -13,7 +13,6 @@ router.post('/registerSensor', function (req, res) {
 	sensor.description = req.body.description;
 	sensor.data = req.body.data;
 	db.save(sensor,function (err, sensor) {
-			console.log(err)
 			if (err) {
 				res.json(err._message);
 			} else {
@@ -30,7 +29,6 @@ router.post('/', function (req, res) {
 	instance.sensor_id = req.body.sensor_id;
 	instance.data = req.body.data;
 	db.save(instance,function (err, sensor) {
-		console.log(err,)
 		if (err) {
 			res.json(err._message);
 		} else {
