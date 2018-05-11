@@ -14,7 +14,7 @@ router.post('/registerSensor', function (req, res) {
 	sensor.data = req.body.data;
 	db.save(sensor,function (err, sensor) {
 			if (err) {
-				res.json(err._message);
+				res.status(500).send(err._message);
 			} else {
 				res.json("feed._id")
 			}
@@ -28,11 +28,14 @@ router.post('/', function (req, res) {
 	instance.device_id = req.body.device_id;
 	instance.sensor_id = req.body.sensor_id;
 	instance.data = req.body.data;
+
+	
 	db.save(instance,function (err, sensor) {
 		if (err) {
-			res.json(err._message);
+			res.status(500).send(err._message);
 		} else {
-			res.json("feed._id")
+			req.app.emit("pushFeed", instance);
+			res.json(instance._id)
 		}
 	});
 })

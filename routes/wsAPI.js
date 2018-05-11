@@ -1,7 +1,11 @@
-module.exports = function(io)
+module.exports = function(io,app)
 {
     io.on('connection', (client) => {
-      console.log("hi")
+      console.log("wow")      
     })
-
+    
+    
+    app.on('pushFeed', (data) => {
+      io.sockets.emit('feed', data);
+    });
 }

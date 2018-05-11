@@ -28,14 +28,13 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 //main app page
 
 //device data listener
-var appData = config.appData;
+
 var devices = require('./routes/deviceAPI');
 app.use('/feed', devices);
 // TODO mqtt feed
+var appData = config.appData;
 
 //query by Index
-var devices = require('./routes/queryAPI');
-app.use('/query', devices);
 
 
 app.get('/ws', (req, res) => {
@@ -47,17 +46,20 @@ app.get('/', (req, res) => {
 });
 
 
-app.get('*', (req, res) => {
-    res.sendFile(__dirname+'/public/'+req.path);
-});
-
 var server = http.listen(process.env.PORT ? process.env.PORT : appData.port, function () {
     console.log('Example app listening on port '+ (process.env.PORT ? process.env.PORT : appData.port));
 })
 
 //websocket query
 var io = require('socket.io')(server);
-app.set('socketio', io);
-var ws = require('./routes/wsAPI')(io);
+var ws = require('./routes/wsAPI')(io,app);
+app.set('socketIo', io);
+
+var devices = require('./routes/queryAPI');
+app.use('/query', devices);
 
 
+app.get('*', (req, res) => {
+    app.on("hello", (client) => console.log("wo"))
+    res.sendFile(__dirname+'/public/'+req.path);
+});

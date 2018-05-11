@@ -7,7 +7,6 @@ var FeedModel = require('../models/feedModel');
 var db = require('../dbs/mongoDB');
 
 function errhandle(error, data,res){
-	console.log(data)
 	if((error)||(data === null)||(data.length === 0)){
 		res.status(500).send(error)
 	}
