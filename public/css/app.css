@@ -1,0 +1,409 @@
+/*global*/ 
+body {
+    margin : 0px;
+    background: linear-gradient(to bottom, #3333cc 0%, #9999ff 100%);
+    color:white;
+}
+path {
+  fill: white;
+}
+.app {
+    display:grid;
+    grid-template-areas : 'menu'
+    'main'
+    'footer';
+    text-transform : capitalize;
+    text-align : center;
+    width:100%;
+    margin: 0 0 0 0;
+    padding: 0px 0px 0px 0px;
+}
+/*login screen*/
+.appLogin{
+    grid-area:main;
+    width: 100%;
+    text-decoration: none;
+    font-weight: bold;
+}
+/*main app menu*/
+.appMenu{
+    display:grid;
+    grid-area:menu;
+    max-height: 50px;
+    position: fixed; /* Set the navbar to fixed position */
+    top: 16px;
+    grid-template-columns: repeat(12, 1fr);
+    text-decoration: none;
+    font-weight: bold;
+}
+.appMenu img{
+    min-height: 30px;
+}
+.appMain{
+    grid-area:main;
+    display:grid;
+    grid-template-areas : 'mainMenu mainMain'
+        'xxx mainMain';
+    text-decoration: none;
+    font-weight: bold;
+    width:95%;
+    margin:2.5%;
+}
+.mainMenu{
+    grid-area:mainMenu;	
+    max-width : 360px !important;
+    display : grid;
+    grid-template-columns: repeat(3, 1fr);
+    text-decoration: none;
+    font-weight: bold;
+}
+.mainMenu svg{
+    width:24;
+    height:24; 
+}
+.mainMenu select {
+    width: 120px !important;
+    min-height:30px;
+    font-size: 150%;
+    border-radius: 12px;
+    border:solid;
+    border-width:1px;
+    color: white;
+    background-color:LightSlateGray ;
+    padding:0px;
+    margin-top:0px;
+}
+.mainMenu input,button {
+	width: 120px !important;
+	min-height:30px;
+	font-size: 150%;
+	border-radius: 12px;
+	border:solid;
+	border-width:1px;
+	color: white;
+	background-color:LightSlateGray ;
+	padding:0px;
+	margin-top:0px;
+}
+.mainMenu button:disabled{
+    border-color: red;
+    background-color: red;
+}
+}
+.mainMenu input[type=color] {
+	background-color:transparent;
+}
+input:-moz-read-only { /* For Firefox */
+    border-color: red;
+}
+input:read-only { 
+    background-color: red;
+}
+.mainMain{
+    grid-area:mainMain;
+    text-decoration: none;
+    font-weight: bold;
+}
+.mainDash{
+    grid-area:main;
+    display : grid;
+    grid-template-columns: 50% 50%;
+    text-decoration: none;
+    font-weight: bold;
+    width:95%;
+    margin:2.5%;
+}
+.mainDash canvas{
+    max-width:99%;
+    max-height:300px;
+    text-transform : capitalize;
+    border: solid;
+    border-width: 1px;
+    border-color: black;
+    background-color: white;
+}
+.lds-dual-ring {
+  display: inline-block;
+  width: 64px;
+  height: 64px;
+}
+.lds-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 100px;
+  height: 100px;
+  margin: 1px;
+  border-radius: 50%;
+  border: 5px solid #fff;
+  border-color: red transparent green transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.appMain canvas{
+    width:90%;
+    text-transform : capitalize;
+}
+.centered {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-top: -50px;
+  margin-left: -50px;
+}
+
+.app-body {
+    position: relative;
+    top:63px;
+    overflow-x: hidden; 
+    background-color:#E0E0E0;
+    height:auto;
+}
+/* The navigation bar */
+.menubar{
+    position: fixed; /* Set the navbar to fixed position */
+    overflow: hidden;    
+    top: 0; /* Position the navbar at the top of the page */
+    width: 100%; /* Full width */
+    border: solid;
+    border-width: 1px;
+    height :16px;
+    background: #070330;
+}
+.menubar:hover{
+    height:30px;
+}
+.menubar svg {
+    width:auto;
+    height: 100%;
+}
+.menubar a:hover{
+    /*max-height: 30px;*/
+     background-color: #ddd;
+}
+.menubar a.router-link-active {
+    background-color: #150a84;
+}
+.thead{
+    top: 70px; /* Position the navbar at the top of the page */
+}
+.thead-inverse th {
+            color: #fff;
+            background-color: #373a3c;
+        }
+.table_grid {
+    border: 1px solid;
+    background-repeat: no-repeat;
+    text-align: center;
+    align-self: center;
+}
+
+.glyphicon {
+    font-size: 10px;
+}
+
+.modal-mask {
+  position: fixed;
+  z-index: 9998;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, .5);
+  display: table;
+  transition: opacity .3s ease;
+}
+
+.modal-wrapper {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.modal-container {
+  width: 200px;
+  height: 200px;
+  margin: 0px auto;
+  padding: 20px 30px;
+  background-color: #fff;
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
+  transition: all .3s ease;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.modal-header h3 {
+  margin-top: 0;
+  color: #42b983;
+}
+
+.modal-body {
+  margin: 5px 0;
+}
+
+
+/*
+ * The following styles are auto-applied to elements with
+ * transition="modal" when their visibility is toggled
+ * by Vue.js.
+ *
+ * You can easily play with the modal transition by editing
+ * these styles.
+ */
+
+.modal-enter {
+  opacity: 0;
+}
+
+.modal-leave-active {
+  opacity: 0;
+}
+.modal-enter .modal-container,
+.modal-leave-active .modal-container {
+  -webkit-transform: scale(1.1);
+  transform: scale(1.1);
+}
+/* Style the tab */
+div.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+div.tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+}
+
+/* Change background color of buttons on hover */
+div.tab button:hover {
+    background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+div.tab button.active {
+    background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+}
+
+.table-fixed tbody {
+  max-height:460px;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+.navbar{
+    min-height: 30px !important;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+}
+th{
+    resize: horizontal;
+    overflow: auto;
+}
+footer {
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    left: 5%;
+    width: 90%;
+    height: 20px;
+    border-top : solid;
+    border-width : 1px;
+}
+@media screen and (max-width:1081px){
+    .app {
+        width:100%;
+        margin-left: 0;
+    }
+    .mainMenu label{
+        display: none;
+    }
+    .mainMenu svg{
+        width : 32;
+        height: 32;
+    }
+    
+}
+
+
+
+
+.modal-mask {
+  position: fixed;
+  z-index: 9998;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, .5);
+  display: table;
+  transition: opacity .3s ease;
+}
+
+.modal-wrapper {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.modal-container {
+  width: 300px;
+  margin: 0px auto;
+  padding: 20px 30px;
+  background-color: #fff;
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
+  transition: all .3s ease;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.modal-header h3 {
+  margin-top: 0;
+  color: #42b983;
+}
+
+.modal-body {
+  margin: 20px 0;
+}
+
+.modal-default-button {
+  float: right;
+}
+
+/*
+ * The following styles are auto-applied to elements with
+ * transition="modal" when their visibility is toggled
+ * by Vue.js.
+ *
+ * You can easily play with the modal transition by editing
+ * these styles.
+ */
+
+.modal-enter {
+  opacity: 0;
+}
+
+.modal-leave-active {
+  opacity: 0;
+}
+
+.modal-enter .modal-container,
+.modal-leave-active .modal-container {
+  -webkit-transform: scale(1.1);
+  transform: scale(1.1);
+}
