@@ -307,10 +307,11 @@ var configCharts = {
 	})    
     }, methods : {
 	getGroups : function(){
+	    t = this;
 	    if (!gs('groups')){
 		getData({"path":"groups"}, function(err,res){
 		    ls(['groups',JSON.stringify(res)]);
-		    return JSON.parse(gs('groups'));
+		    t.selectGroups=res;
 		});
 	    } else{
 		return JSON.parse(gs('groups'));
@@ -332,29 +333,29 @@ var configCharts = {
 	    };
 	    ls(['dash',JSON.stringify(d)]) ;
 	    vue.showAlert('saved dashboard');
-	}, getGroup : function(){
-	    data  = this.$data;
-	    if (!gs('group_'+data.group)){
-		getData({"path":"group","group_id":data.group}, function(err,res){
+//	}, getGroup : function(){
+//	    data  = this.$data;
+//	    if (!gs('group_'+data.group)){
+//		getData({"path":"group","group_id":data.group}, function(err,res){
+//		    if (res){
+//			ls(['group_'+data.group,JSON.stringify(res.group_devices)]);
+//			data.selectDevices=res[res.group_devices];
+//		    }
+//		});
+//	    } else {
+//		data.selectDevices=JSON.parse(gs('group_'+data.group));
+//	    };
+s	}, getGroup : function(){
+	    t  = this;
+	    if (!gs('group_'+t.$data.dashConfig.group)){
+		getData({"path":"group","group_id":t.$data.dashConfig.group}, function(err,res){
 		    if (res){
-			ls(['group_'+data.group,JSON.stringify(res.group_devices)]);
-			data.selectDevices=res[res.group_devices];
+			ls(['group_'+t.$data.dashConfig.group,JSON.stringify(res.group_devices)]);
+			t.$data.selectDevices=res.group_devices;
 		    }
 		});
 	    } else {
-		data.selectDevices=JSON.parse(gs('group_'+data.group));
-	    };
-	}, getGroup : function(){
-	    data  = this.$data;
-	    if (!gs('group_'+data.dashConfig.group)){
-		getData({"path":"group","group_id":data.dashConfig.group}, function(err,res){
-		    if (res){
-			ls(['group_'+data.dashConfig.group,JSON.stringify(res.group_devices)]);
-			data.selectDevices=res[res.group_devices];
-		    }
-		});
-	    } else {
-		data.selectDevices=JSON.parse(gs('group_'+data.dashConfig.group));
+		t.$data.selectDevices = JSON.parse(gs('group_'+t.$data.dashConfig.group));
 	    };
 	}, changeDevice : function(){
 	    this.$data.selectSensors=this.$data.selectDevices.filter(({device_id}) => device_id === this.$data.dashConfig.device)[0].device_sensors;
@@ -375,7 +376,7 @@ var configCharts = {
 		<div><div><span v-html="icon('text-size')"></span><label>name</label></div><input id="nameDash" type="text" v-model="dashConfig.name"></input></div>
 		<div><div><span v-html="icon('arrow-down')"></span><label>save</label></div><button v-bind:disabled="!dashConfig.sensor" id="saveDash" @click.prevent="saveDash"><span v-html="icon('arrow-down')"></button></div>
 		<div><div><span v-html="icon('package')"></span><label>groups</label></div>
-		    <select v-if="dashLoad()" id="selectGroup" v-model="dashConfig.group" @change="getGroup()"><option selected value></option><option v-for="i in selectGroups" :value="i">{{i}}</option></select>
+		    <select v-if="dashLoad()" id="selectGroup" v-model="dashConfig.group" @change="getGroup()"><option selected value></option><option v-for="i in selectGroups" :value="i.group_id">{{i.group_id}}</option></select>
 		    <input  v-else id="selectGroup" v-model="dashConfig.group" readonly></input>
 		</div>
 		<div><div><span v-html="icon('device-mobile')"></span><label>devices</label></div>
