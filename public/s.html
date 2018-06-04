@@ -17,9 +17,9 @@
 <script>
   var socket = io();
   socket.on('connect', function(){
-  socket.on('hello', function(data){
+  socket.on('feed', function(data){
     console.log(data);
-    });
+  });
   });
 </script>
   <body>
