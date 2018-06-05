@@ -4,7 +4,6 @@ module.exports = function(io,app)
       // console.log("wow")      
     })
     
-    
     app.on('pushFeed', (data) => {
       io.sockets.emit('feed', data);
     });

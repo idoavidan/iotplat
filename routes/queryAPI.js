@@ -8,7 +8,12 @@ var db = require('../dbs/mongoDB');
 
 function errhandle(error, data,res){
 	if((error)||(data === null)||(data.length === 0)){
+		console.log(error)
 		res.status(500).send(error)
+	}
+	if((data === null)||(data.length === 0)){
+		console.log(error)
+		res.send("")
 	}
 	else res.json(data)
 }
@@ -34,6 +39,9 @@ router.post('/groups', function(req,res){
 	
 router.post('/group', function(req,res){
 	query = {group_id : req.body.group_id};
+	// query = req.body.group_id;
+	
+	// console.log(query)
 	exclude = {_id : 0, __v : 0, "group_devices._id" : 0, "group_devices.device_sensors._id" : 0};
 	db.findOne(GroupModel,query,exclude,(data,err) => errhandle(err,data,res))		
 })
@@ -43,6 +51,36 @@ router.post('/createGroup', function(req,res){
 	instance.group_id = req.body.group_id;
 	instance.group_devices = req.body.group_devices;
 	db.save(instance, (err,data) => errhandle(err,data,res))	
+})
+
+//users
+var UserModel = require('../models/userModel');
+
+router.post('/registerUser', function(req,res){
+	var instance = new UserModel();	
+	instance.username = req.body.username;
+	instance.password = req.body.password;
+	instance.email = req.body.email;
+	instance.graphs = {g1 : "wow"};
+	console.log(instance)
+	db.save(instance, (err,data) => errhandle(err,data,res))	
+})
+
+router.post('/saveGraph', function(req,res){
+	exclude = {};
+	query = {username : req.body.username};
+	db.update(UserModel,query,exclude, function(err,user){
+		if (err) {res.json(err)}
+		user.set({graphs : req.body.graph})
+		db.save(user , (err,data) => errhandle(err,data,res));
+	})	
+})
+
+router.post('/getGraph', function(req,res){
+	exclude = {};
+	query = {username : req.body.username};
+	db.findOne(UserModel,query,exclude, (data,err) =>  errhandle(err,data.graphs,res));
+		
 })
 
 module.exports = router;
