@@ -53,17 +53,7 @@ app.post('/login',
     }
 );
 
-app.use(passport.authenticate('bearer', { session: false }),(req,res,next) => next());
-
-
-//device data listener
-
-var devices = require('./routes/deviceAPI');
-app.use('/feed', devices);
-// TODO mqtt feed
 var appData = config.appData;
-
-//query by Index
 
 
 app.get('/ws', (req, res) => {
@@ -73,6 +63,17 @@ app.get('/ws', (req, res) => {
 app.get('/', (req, res) => {
     res.sendFile(__dirname+'/public/index.html');
 });
+
+app.use(passport.authenticate('bearer', { session: false }),(req,res,next) => next());
+
+
+//device data listener
+
+var devices = require('./routes/deviceAPI');
+app.use('/feed', devices);
+// TODO mqtt feed
+//query by Index
+
 
 
 var server = http.listen(process.env.PORT ? process.env.PORT : appData.port, function () {
