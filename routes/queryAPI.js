@@ -8,6 +8,9 @@ var FeedModel = require('../models/feedModel');
 var db = require('../dbs/mongoDB');
 
 function errhandle(error, data,res){
+    c('err'+error)
+    c(data)
+//    c(res)
     if(error){
 	c(error);
 	res.status(500).send(error);
@@ -66,7 +69,12 @@ router.post('/saveGraph', function(req,res){
     query = {username : req.body.username};
     db.update(UserModel,query,exclude, function(err,user){
 	if (err) {res.json(err);};
-	user.set({graphs : req.body.graph});
+	var pos = user.graphs.findIndex(o => o.name === req.body.graph.name);
+	if (pos!=-1){
+	    user.graphs.splice(pos,1,req.body.graph);
+	} else{
+	    user.graphs.push(req.body.graph);
+	};
 	db.save(user , (err,data) => errhandle(err,data,res));
     });
 });

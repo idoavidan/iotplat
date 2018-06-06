@@ -7,7 +7,7 @@ var UserSchema = new Schema({
 	token : {type: String, required : false, max : 99},
 	active : {type : Boolean, required : true, default : true},
 	email : {type: String, required : true, max : 99},
-	graphs : {}
+	graphs : {type: Array, required : false},
 });
 
 module.exports = mongoose.model('user', UserSchema);
