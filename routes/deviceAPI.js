@@ -21,6 +21,14 @@ router.post('/registerSensor', function (req, res) {
 		});
 })
 
+// var mail = require('../mail.js');
+// mail.sendMail(mailOptions = {
+//     from: 'iotplat1@gmail.com', // sender address
+//     to: 'idosurfer@gmail.com', // list of receivers
+//     subject: 'Subject of your email1', // Subject line
+//     html: '<p>Your html here</p>'// plain text body
+// })
+
 router.post('/', function (req, res) {
 	var instance = new FeedModel();	
 	instance.time = req.body.time;

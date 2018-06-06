@@ -90,6 +90,6 @@ app.use('/query', devices);
 
 
 app.get('*', (req, res) => {
-    app.on("hello", (client) => console.log("wo"))
+    // app.on("hello", (client) => console.log("wo"))
     res.sendFile(__dirname+'/public/'+req.path);
 });

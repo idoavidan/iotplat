@@ -53,6 +53,12 @@ router.post('/createGroup', function(req,res){
 
 //users
 var UserModel = require('../models/userModel');
+router.post('/updateUser', function(req,res){
+    var user = req.user;
+    var update = req.body.user;
+    user.set(update);
+    db.save(user, (err,data) => res.json(data))
+});
 
 router.post('/saveGraph', function(req,res){
     var user = req.user
@@ -71,5 +77,6 @@ router.post('/getGraph', function(req,res){
     query = {username : req.user.username};
     db.findOne(UserModel,query,exclude, (data,err) =>  errhandle(err,data.graphs,res));
 });
+
 
 module.exports = router;
