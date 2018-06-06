@@ -8,14 +8,14 @@ var FeedModel = require('../models/feedModel');
 var db = require('../dbs/mongoDB');
 
 function errhandle(error, data,res){
-    c('err'+error)
-    c(data)
+    // c('err'+error)
+    // c(data)
 //    c(res)
     if(error){
-	c(error);
+	// c(error);
 	res.status(500).send(error);
     } else if(data === null || data.length === 0){
-	c(error);
+	// c(error);
 	res.send("");
     } else res.json(data);
 }
@@ -54,34 +54,21 @@ router.post('/createGroup', function(req,res){
 //users
 var UserModel = require('../models/userModel');
 
-router.post('/registerUser', function(req,res){
-    var instance = new UserModel();	
-    instance.username = req.body.username;
-    instance.password = req.body.password;
-    instance.email = req.body.email;
-    instance.graphs = {g1 : "wow"};
-    c(instance);
-    db.save(instance, (err,data) => errhandle(err,data,res))	
-})
-
 router.post('/saveGraph', function(req,res){
-    exclude = {};
-    query = {username : req.body.username};
-    db.update(UserModel,query,exclude, function(err,user){
-	if (err) {res.json(err);};
-	var pos = user.graphs.findIndex(o => o.name === req.body.graph.name);
-	if (pos!=-1){
-	    user.graphs.splice(pos,1,req.body.graph);
-	} else{
-	    user.graphs.push(req.body.graph);
-	};
-	db.save(user , (err,data) => errhandle(err,data,res));
-    });
+    var user = req.user
+    var pos = user.graphs.findIndex(o => o.name === req.body.graph.name);
+    if (pos!=-1){
+        user.graphs.splice(pos,1,req.body.graph);
+    } else{
+        user.graphs.push(req.body.graph);
+    };
+    db.save(user, (err,data) => res.json("olay havad olay lo"))
+
 });
 
 router.post('/getGraph', function(req,res){
     exclude = {};
-    query = {username : req.body.username};
+    query = {username : req.user.username};
     db.findOne(UserModel,query,exclude, (data,err) =>  errhandle(err,data.graphs,res));
 });
 

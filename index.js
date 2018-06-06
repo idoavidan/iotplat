@@ -1,9 +1,16 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 const path = require('path');
-const mongoose = require('mongoose');
-var config = require('./private/config.json');
 
+const mongoose = require('mongoose');
+var db = require('./dbs/mongoDB');
+
+var config = require('./private/config.json');
+var passport = require('passport');
+var Strategy = require('passport-http-bearer').Strategy;
+
+const UIDGenerator = require('uid-generator');
+const uidgen = new UIDGenerator();
 //git check
 var app = express()
 var http = require('http').Server(app);
@@ -13,19 +20,41 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true
 })); 
 
-
-//auth 
-app.use((req,res,next) => next());
-
-//db connection
+//moongose connection
 
 mongoose.connect(config.conn);
-var db = mongoose.connection;
+var mongooseConnection = mongoose.connection;
+mongooseConnection.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-// var MyModel = require('./models/feedModel');
 
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-//main app page
+//auth 
+var UserModel = require('./models/userModel');
+
+passport.use(new Strategy(
+    function(token1, cb) {
+      db.findOne(UserModel,{token : token1}, {password : 0},  function(user, err) {
+        if (err) { return cb(err); }
+        if (!user) { return cb(null, false); }
+        return cb(null, user);
+    });
+}));
+
+app.post('/login',
+    function(req, res, next) {
+        db.update(UserModel,
+                {username : req.body.username,
+                 password : req.body.password}, {}, 
+        function(err, user) {
+            if (err) { return res.json("err"); }
+            if (!user) { return res.json("no user"); }
+            user.token = uidgen.generateSync();
+            db.save(user, (err,user) => res.json(user.token))
+        });
+    }
+);
+
+app.use(passport.authenticate('bearer', { session: false }),(req,res,next) => next());
+
 
 //device data listener
 
