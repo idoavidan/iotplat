@@ -8,15 +8,10 @@ var FeedModel = require('../models/feedModel');
 var db = require('../dbs/mongoDB');
 
 function errhandle(error, data,res){
-    // c('err'+error)
-    // c(data)
-//    c(res)
     if(error){
-	// c(error);
 	res.status(500).send(error);
     } else if(data === null || data.length === 0){
-	// c(error);
-	res.send("");
+	res.send({});
     } else res.json(data);
 }
 
@@ -52,6 +47,20 @@ router.post('/createGroup', function(req,res){
 })
 
 //users
+router.post('/users', function(req,res){
+    query = {};
+    exclude = {_id : 0, __v : 0, password : 1};
+    db.find(UserModel,query,exclude,(data,err) => errhandle(err,data ,res));	
+});
+
+router.post('/registerUser', function(req,res){
+    var instance = new UserModel();	
+    instance.username = req.body.username;
+    instance.password = req.body.password;
+    instance.email = req.body.email;
+    instance.graphs = [];
+    db.save(instance, (err,data) => errhandle(err,data,res))	
+});
 var UserModel = require('../models/userModel');
 router.post('/updateUser', function(req,res){
     var user = req.user;
@@ -69,7 +78,6 @@ router.post('/saveGraph', function(req,res){
         user.graphs.push(req.body.graph);
     };
     db.save(user, (err,data) => res.json("olay havad olay lo"))
-
 });
 
 router.post('/getGraph', function(req,res){

@@ -1,3 +1,4 @@
+var c = console.log.bind(console);
 var express = require('express');
 var bodyParser = require('body-parser');
 const path = require('path');
@@ -32,7 +33,7 @@ var UserModel = require('./models/userModel');
 
 passport.use(new Strategy(
     function(token1, cb) {
-      db.findOne(UserModel,{token : token1}, {password : 0},  function(user, err) {
+    db.findOne(UserModel,{token : token1}, {password : 0},  function(user, err) {
         if (err) { return cb(err); }
         if (!user) { return cb(null, false); }
         return cb(null, user);
@@ -41,20 +42,19 @@ passport.use(new Strategy(
 
 app.post('/login',
     function(req, res, next) {
-        db.update(UserModel,
-                {username : req.body.username,
-                 password : req.body.password}, {}, 
+        db.update(UserModel,{
+	    username : req.body.username,
+	    password : req.body.password}, {}, 
         function(err, user) {
             if (err) { return res.json("err"); }
             if (!user) { return res.json("no user"); }
             user.token = uidgen.generateSync();
-            db.save(user, (err,user) => res.json(user.token))
+            db.save(user, (err,user) => res.json({'token':user.token}))
         });
     }
 );
 
 var appData = config.appData;
-
 
 app.get('/ws', (req, res) => {
     res.sendFile(__dirname+'/public/s.html');
@@ -63,22 +63,22 @@ app.get('/ws', (req, res) => {
 app.get('/', (req, res) => {
     res.sendFile(__dirname+'/public/index.html');
 });
-
+app.get('*', (req, res) => {
+//    app.on("hello", (client) => console.log("wo"))
+    res.sendFile(__dirname+'/public/'+req.path);
+});
 app.use(passport.authenticate('bearer', { session: false }),(req,res,next) => next());
 
 
 //device data listener
-
 var devices = require('./routes/deviceAPI');
 app.use('/feed', devices);
 // TODO mqtt feed
 //query by Index
 
-
-
 var server = http.listen(process.env.PORT ? process.env.PORT : appData.port, function () {
-    console.log('Example app listening on port '+ (process.env.PORT ? process.env.PORT : appData.port));
-})
+    c('Example app listening on port '+ (process.env.PORT ? process.env.PORT : appData.port));
+});
 
 //websocket query
 var io = require('socket.io')(server);
@@ -87,9 +87,3 @@ app.set('socketIo', io);
 
 var devices = require('./routes/queryAPI');
 app.use('/query', devices);
-
-
-app.get('*', (req, res) => {
-    // app.on("hello", (client) => console.log("wo"))
-    res.sendFile(__dirname+'/public/'+req.path);
-});

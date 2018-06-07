@@ -11,8 +11,7 @@ function loader(data){
     };
 };
 //var myWorker = new Worker('./js/app2.js');
-var appData={"path":"query",
-    "selectChart":["line","bar"]};
+var appData={"selectChart":["line","bar"]};
 function el(data){
     return document.getElementById(data);
 };
@@ -46,7 +45,7 @@ function addScript(data,callback) {
 //request data 
 function getData(data,callback){
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", appData.path+'/'+data.path, true);
+    xhr.open("POST", data.path, true);
     //Send the proper header information along with the request
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.onload = function(e) {//Call a function when the state changes.
@@ -62,6 +61,7 @@ function getData(data,callback){
 	    callback(xhr,null);
 	};
     };  
+    data.access_token=gs('token');
     xhr.send(JSON.stringify(data)); 
 };
 function getFile(data,callback){
@@ -96,93 +96,8 @@ function start(){
 	 });
     });
 };
-
-function changeSensor(data){
-    if(data){
-	getData({"path":"feedsByIndex","index":"sensor","value":data}
-	, function(err,res){
-	    if(res){
-		ls([data,JSON.stringify(res)]);
-		showChart(res);
-	    } else
-	    {
-		alert('No data found')
-	    }
-	});
-    } else if(!data){
-//	showChart(JSON.parse(d));
-    }
-};
-function changeChart(data){
-    if(data){
-	getData({"path":"feedsByIndex","index":"sensor","value":data}
-	, function(res){
-	    showChart(res);
-	});
-    };
-};
 start();
 var mainChart;
-function showChart(msg){
-    var labels=[];
-    var data=[];
-    var dataColor=[]
-    var type=el("selectChart").value ? el("selectChart").value :'line';
-    msg.map(o => {
-	d = new Date(o.time*1000); // The 0
-	labels.push(String(d.getHours()).padStart(2,"0")+':'+String(d.getMinutes()).padStart(2,"0")+':'+String(d.getSeconds()).padStart(2,"0"));
-	data.push(o.data);
-	if(o.data<25 || o.data >35){
-		dataColor.push("red");
-	}
-	else{
-	    dataColor.push(el("selectColor").value);
-	};
-    });
-	el("mainChart").innerHTML="";
-	if (mainChart){mainChart.destroy()};
-	var ctx = el("mainChart").getContext('2d');
-	mainChart= new Chart(ctx, {
-	type: type,
-		data: {
-		labels: labels,
-		datasets: [{
-			type: el('selectChart').value,
-			fill:false,
-			label: el("selectGroup").value+'-'+el("selectDevice").value+'-'+el("selectSensor").value,
-			data: data,
-			pointBackgroundColor: dataColor,
-			backgroundColor: el("selectColor").value,
-			borderWidth: 1
-		}]
-		},
-		options: {
-			responsive: true,
-			legend: {
-				labels: {
-				fontColor: "black",
-				fontSize: 18
-				}
-			},
-			scales: {
-			yAxes: [{
-			ticks: {
-			beginAtZero: true
-			}
-			}],
-			 xAxes: [{
-		ticks: {
-			fontColor: "black",
-			fontSize: 14,
-			stepSize: 10,
-			beginAtZero: true
-		}
-	}]
-			}
-		}
-	});
-		
-};
 var modal = 
     `<transition name="modal">
 	<div class="modal-mask">
@@ -209,23 +124,60 @@ var modal =
 	    </div>
 	  </div>
 	</div>
+      </transition>`;
+var modAlert = 
+    `<transition name="modal">
+	<div class="modal-mask">
+	  <div class="modal-wrapper">
+	    <div class="modal-container-alert">
+	      <div class="modal-header">
+		<slot name="header">
+		</slot>
+	      </div>
+	      <div class="modal-body">
+		<slot name="body">
+		</slot>
+	      </div>
+	      <div class="modal-footer">
+		<slot name="footer">
+		  <button class="modal-default-button" @click="$emit('close')">
+		    OK
+		  </button>
+		</slot>
+	      </div>
+	    </div>
+	  </div>
+	</div>
       </transition>`
 ;
 var login = {
     data : function() {
 	return {
-	    username: null,
-	    password: null,
+	    username: "max",
+	    password: "max",
 	    token: null,
 	    err: null
 	}
-    }, created : function (){c('created login');ls(['username','max']);router.push('/main') 
-    }, mounted : function (){ c('mounted login');
+    }, created : function (){
+	c('created login');
+	ls(['user',this.$data.username]);
+	this.login()
+    }, mounted : function (){ 
+	c('mounted login');
     }, updated : function (){
 	el('username').focus();
     }, methods : {
 	login : function () {
-	    router.push('/main');
+	    c(this.$data.username)
+	    getData({"path":"login","username": this.$data.username,"password":this.$data.password}, function(err,res){
+		c(res)
+		if(res.token){
+		    router.push('/main');
+		    ls(['token',res.token]);
+		} else {
+		    c(err);
+		}
+	    });
 	}
     },
     template:
@@ -257,7 +209,7 @@ var main = {
 	c('created main')
 	addScript({"path":"./js/moment.min.js","name":"moment.min.js"},function(){
 //	   router.push('/main/'+pages[0].path);
-	router.push('/main/'+'configCharts');
+	router.push('/main/'+'confCharts');
 	});
     }, mounted : function () {
 	c('mounted main')
@@ -267,22 +219,24 @@ var main = {
 	}
     }, template :
 	`<div><div id="loader" class="lds-dual-ring centered"></div>
-	<modal v-if="vue.$data.showModal" @close="vue.$data.showModal = false">
-	    <h3 id="modal" slot="header">{{vue.$data.showModal}}</h3>
-	</modal>
-	 <div name="bar"><div class="appMenu menubar" role="navigation"> <router-link v-for="rec in pages" :to="{ name: rec.name }"><span v-html="rec.logo"></span></a> </li></div></div>
+	    <modAlert v-if="vue.$data.showAlert" @close="vue.$data.showAlert = false">
+		<h3 id="modAlert" slot="header">{{vue.$data.showAlert}}</h3>
+	    </modAlert>
+	    <modal v-if="vue.$data.showModal" @close="vue.$data.showModal = false">
+		<h3 id="modModal" slot="header">{{vue.$data.showModal}}</h3>
+	    </modal>
+	     <div name="bar"><div class="appMenu menubar" role="navigation"> <router-link v-for="rec in pages" :to="{ name: rec.name }"><span v-html="rec.logo"></span></a> </li></div></div>
 	    <router-view></router-view>
 	</div>`
-}
-var configCharts = {
+};
+var confCharts = {
      data () {
 	return	{
 	    interval : '',
-	    selectInterval : [30,60,300,1800,3600,7200,14400,28800,86400,604800,2629746,31556952],
 	    chart : '',
-	    selectChart: ['','bar','line','map'],
-	    dashConfig:{minColor:'#0000FF'},
-	    selectDash:this.getDash(),
+	    selectChart : ['','bar','line','map'],
+	    dashConfig : {minColor:'#0000FF',maxColor:'#ff0000',chart:'line',interval:604800},
+	    selectDash : this.getDash(),
 	    group : '',
 	    selectGroups : this.getGroups(),
 	    device : '',
@@ -293,62 +247,73 @@ var configCharts = {
 	    selectColors : '',
 	    min:'',
 	    max:'',
-	    maxColor:'#ff0000',    
 	}
     }, created () {
-	c('created configCharts');
+	c('created confCharts');
 	loader(1);
 	addScript({"path":"./js/Chart.min.js","name":"Chart.min.js"},function(){
 	});
     }, mounted () {
 	this.$nextTick(function () {
-	    c('mounted configCharts');
+	    c('mounted confCharts');
 	    loader(0);
 	})    
     }, methods : {
 	getGroups : function(){
 	    t = this;
 	    if (!gs('groups')){
-		getData({"path":"groups"}, function(err,res){
-		    ls(['groups',JSON.stringify(res)]);
-		    t.selectGroups=res;
+		getData({"path":"query/groups"}, function(err,res){
+		    if(res){
+			ls(['groups',JSON.stringify(res)]);
+			t.selectGroups=res;
+		    } else {
+			c(err);
+		    }
 		});
 	    } else{
 		return JSON.parse(gs('groups'));
 	    };
 	}, getDash : function () {
 	   return gs('dash') ? JSON.parse(gs('dash')) : [];
-	}, dashLoad :function(){
-	 return el('selectDash')===null || el('selectDash').value==='';
+	}, dashLoad : function(){
+	    if (el('selectDash')===null || el('selectDash').value===''){
+		this.destroyChart();
+		return true;
+	    } else {
+		return false;
+	    };
 	}, saveDash : function () {
 	    var data = this.$data;
-	    if(!data.dashConfig.sensor){vue.showAlert('No sensors');return;} ;
+	    if(!data.dashConfig.sensor){vue.showModAlert('No sensors');return;} ;
 	    data.dashConfig.name = data.dashConfig.name || (data.dashConfig.group+data.dashConfig.device+data.dashConfig.sensor);
-	    var d = this.getDash();
-	    var pos = d.findIndex(o => o.name === data.dashConfig.name);
-	    if (pos!=-1){
-		d[pos]=data.dashConfig;	
+	    var data = this.$data.dashConfig
+	    if(!data.sensor){
+		vue.showModAlert('No sensors');
+		return;
 	    } else{
-		d.push(data.dashConfig);
-	    };
-	    ls(['dash',JSON.stringify(d)]) ;
-	    vue.showAlert('saved dashboard');
-//	}, getGroup : function(){
-//	    data  = this.$data;
-//	    if (!gs('group_'+data.group)){
-//		getData({"path":"group","group_id":data.group}, function(err,res){
-//		    if (res){
-//			ls(['group_'+data.group,JSON.stringify(res.group_devices)]);
-//			data.selectDevices=res[res.group_devices];
-//		    }
-//		});
-//	    } else {
-//		data.selectDevices=JSON.parse(gs('group_'+data.group));
-//	    };
-s	}, getGroup : function(){
+		getData({"path":"query/saveGraph","username":"ido","graph":data}, function(err,res){
+		    c(res)
+		    if(res){
+			vue.showModAlert('dashboard saved');
+			var d = this.getDash();
+			var pos = d.findIndex(o => o.name === data.dashConfig.name);
+			if (pos!=-1){
+			    d[pos]=data.dashConfig;	
+			} else{
+			    d.push(data.dashConfig);
+			};
+			ls(['dash',JSON.stringify(d)]) ;
+		    } else {
+			vue.showModAlert('dashboard not saved, see log');
+			c(err);
+		    }
+		});
+	    }
+	}, getGroup : function(){
+	    c('gg')
 	    t  = this;
 	    if (!gs('group_'+t.$data.dashConfig.group)){
-		getData({"path":"group","group_id":t.$data.dashConfig.group}, function(err,res){
+		getData({"path":"query/group","group_id":t.$data.dashConfig.group}, function(err,res){
 		    if (res){
 			ls(['group_'+t.$data.dashConfig.group,JSON.stringify(res.group_devices)]);
 			t.$data.selectDevices=res.group_devices;
@@ -359,15 +324,83 @@ s	}, getGroup : function(){
 	    };
 	}, changeDevice : function(){
 	    this.$data.selectSensors=this.$data.selectDevices.filter(({device_id}) => device_id === this.$data.dashConfig.device)[0].device_sensors;
-	}, changeInterval : function(){	    
-	    if(this.$data.interval){
+	}, changeChart : function(){	    
+	    d = this.$data.dashConfig;
+	    if(d.interval && d.sensor){
 		var dt= Date.now();
-		getData({"path":"feedsByIndex","index":"sensor","value":el("selectSensor").value,
-		    "from":dt/1000-this.$data.interval,"to":dt/1000}
-		, function(res){
-		    showChart(res);
+		getData({"path":"query/feedsByIndex","index":"sensor","value":d.sensor,
+		    "from":dt/1000-d.interval,"to":dt/1000}
+		, function(err,res){
+		    if (res && res.length>0){
+			c(res)
+			t.showChart(res);
+		    } else if ( res && res.length===0){
+			vue.showModAlert('No data found');
+		    } else if (err){
+			c(err);
+		    }
 		});
 	    };
+	}, destroyChart : function(){
+	    if (mainChart && el("mainChart")){mainChart.destroy(); c('main');el("mainChart").innerHTML="";}; 
+	}, showChart : function(msg){
+	    var ddd = this.$data.dashConfig;
+	    var labels = [];
+	    var data = [];
+	    var dataColor = [];
+	    var type = ddd.chart ? ddd.chart : this.$data.selectChart[0];
+	    msg.map(o => {
+		d = new Date(o.time*1000); // The 0
+		labels.push(String(d.getHours()).padStart(2,"0")+':'+String(d.getMinutes()).padStart(2,"0")+':'+String(d.getSeconds()).padStart(2,"0"));
+		data.push(o.data);
+		if(o.data<ddd.min){
+		    dataColor.push(ddd.minColor);
+		} else if(o.data>ddd.max){
+		    dataColor.push(ddd.maxColor);
+		} else{
+		    dataColor.push(ddd.color||'black');
+		};
+	    });
+	    this.destroyChart();
+	    mainChart = new Chart( el('mainChart').getContext('2d'), {
+		type: type,
+		data: {
+		    labels: labels,
+		    datasets: [{
+			    type: type,
+			    fill:false,
+			    label: ddd.group+'-'+ddd.device+'-'+ddd.sensor,
+			    data: data,
+			    pointBackgroundColor: dataColor,
+			    backgroundColor : dataColor,
+			    fillColors : dataColor, 
+			    borderWidth: 1
+		    }]
+		}, options: {
+		    responsive: true,
+		    legend: {
+			labels: {
+			    fontColor: "black",
+			    fontSize: 36
+			}
+		    },
+		    scales: {
+			yAxes: [{
+			    ticks: {
+				beginAtZero: true
+			    }
+			}],
+			xAxes: [{
+			    ticks: {
+				fontColor: "black",
+				fontSize: 24,
+				stepSize: ddd.interval,
+				beginAtZero: true
+			    }
+			}]
+		    }
+		}
+	    });
 	}
     }, template :
 	`<div class="appMain">
@@ -377,20 +410,20 @@ s	}, getGroup : function(){
 		<div><div><span v-html="icon('arrow-down')"></span><label>save</label></div><button v-bind:disabled="!dashConfig.sensor" id="saveDash" @click.prevent="saveDash"><span v-html="icon('arrow-down')"></button></div>
 		<div><div><span v-html="icon('package')"></span><label>groups</label></div>
 		    <select v-if="dashLoad()" id="selectGroup" v-model="dashConfig.group" @change="getGroup()"><option selected value></option><option v-for="i in selectGroups" :value="i.group_id">{{i.group_id}}</option></select>
-		    <input  v-else id="selectGroup" v-model="dashConfig.group" readonly></input>
+		    <input v-else id="selectGroup" v-model="dashConfig.group" readonly></input>
 		</div>
 		<div><div><span v-html="icon('device-mobile')"></span><label>devices</label></div>
 		    <select v-if="dashLoad()" id="selectDevice" v-model="dashConfig.device" @change="changeDevice()"><option selected value></option><option v-for="i in selectDevices" :value="i.device_id">{{i.device_id}}</option></select>
-		    <input  v-else id="selectDevice" v-model="dashConfig.device" readonly></input>
+		    <input v-else id="selectDevice" v-model="dashConfig.device" readonly></input>
 		</div>
 		<div><div><span v-html="icon('pulse')"></span><label>sensors</label></div>
-		    <select v-if="dashLoad()" id="selectSensor" v-model="dashConfig.sensor" @change="changeSensor(el('selectSensor').value)"><option selected value></option><option v-for="i in selectSensors" :value="i.sensor_id">{{i.sensor_id}}</option></select>
-		    <input  v-else id="selectSensor" v-model="dashConfig.sensor" readonly></input>
+		    <select v-if="dashLoad()" id="selectSensor" v-model="dashConfig.sensor" @change="changeChart()"><option selected value></option><option v-for="i in selectSensors" :value="i.sensor_id">{{i.sensor_id}}</option></select>
+		    <input v-else id="selectSensor" v-model="dashConfig.sensor" readonly>{{changeChart()}}</input>
 		</div>	
 		<div><div><span v-html="icon('calendar')"></span><label>from</label></div><input id="fromSelect" type="date" placeholder="from"></input></div>
 		<div><div><span v-html="icon('calendar')"></span><label>to</label></div><input id="toSelect" type="date" placeholder="to"></input></div>
-		<div><div><span v-html="icon('clock')"></span><label>interval</label></div><select id="selectInterval" v-model="dashConfig.interval" @change="changeInterval()"><option v-for="i in selectInterval" :value="i">{{moment.duration(i,"seconds").humanize()}}</option></select></div>	
-		<div><div><span v-html="icon('graph')"></span><label>chart</label></div><select id="selectChart" v-model="dashConfig.chart" @change="changeSensor(el('selectSensor').value)"><option v-for="i in selectChart" :value="i">{{i}}</option></select></div>
+		<div><div><span v-html="icon('clock')"></span><label>interval</label></div><select id="vue.$data.selectInterval" v-model="dashConfig.interval" @change="changeChart()"><option v-for="i in vue.$data.selectInterval" :value="i">{{moment.duration(i,"seconds").humanize()}}</option></select></div>	
+		<div><div><span v-html="icon('graph')"></span><label>chart</label></div><select id="selectChart" v-model="dashConfig.chart" @change="changeChart()"><option v-for="i in selectChart" :value="i">{{i}}</option></select></div>
 		<div><div><span v-html="icon('pencil')"></span><label>chart color</label></div><input id="selectColor" type="color" v-model="dashConfig.color"></input></div>
 		<div></div>
 		<div><div><span v-html="icon('dash')"></span><label>minimum</label></div><input id="min" type="number" v-model="dashConfig.min"></input></div>
@@ -405,12 +438,12 @@ s	}, getGroup : function(){
 	    </div>
 	</div>`
 };
-var configGroups = {
+var confGroups = {
     created : function(){
 	    loader(1);
-	    c('created configGroups')
+	    c('created confGroups')
     }, mounted : function () {
-	    c('mounted configGroups')
+	    c('mounted confGroups')
 	    loader(0);
     }, template :
 	`<div><div class="appMenu">
@@ -435,11 +468,10 @@ var dash = {
     data () {
 	return	{
 	    interval : '',
-	    selectInterval : [30,60,300,1800,3600,7200,14400,28800,86400,604800,2629746,31556952],
 	    chart : '',
 	    selectChart: ['line','bar','map'],
-	    dash : '',
-	    selectDash:this.getDash(),
+	    dashConfig : '',
+	    selectDash : this.getDash(),
 	    charts:{},
 	    group : '',
 	    selectGroups : '',
@@ -458,10 +490,12 @@ var dash = {
 	    var d = t.getDash();
 	    t.getDash().map(o=>{
 		if(o.sensor){
-		    getData({"path":"feedsByIndex","index":"sensor","value":o.sensor}
+		    var dt= Date.now();
+		    getData({"path":"query/feedsByIndex","index":"sensor","value":o.sensor,
+		    "from":dt/1000-o.interval,"to":dt/1000}
 		    , function(err,res){
 			if(res){
-			    t.$data.dash=o;
+			    t.$data.dashConfig=o;
 			    t.showChart(res);
 			} else {
 			    c(err);
@@ -478,38 +512,37 @@ var dash = {
 	getDash : function () {
 	   return gs('dash') ? JSON.parse(gs('dash')) : [];
 	}, showChart : function(msg){
-	    var ddd = this.$data;
-	    c(ddd.dash)
+	    var ddd = this.$data.dashConfig;
+	    var charts={};
 	    var labels=[];
 	    var data=[];
 	    var dataColor=[];
-	    var type=ddd.dash.chart ? ddd.dash.chart : ddd.selectChart[0];
+	    var type=ddd.chart ? ddd.chart : this.$data.selectChart[0];
 	    msg.map(o=>{
 		d = new Date(o.time*1000); // The 0
 		labels.push(String(d.getHours()).padStart(2,"0")+':'+String(d.getMinutes()).padStart(2,"0")+':'+String(d.getSeconds()).padStart(2,"0"));
 		data.push(o.data);
-		if(o.data<ddd.dash.min){
-		    dataColor.push(ddd.dash.minColor);
-		} else if(o.data>ddd.dash.max){
-		    dataColor.push(ddd.dash.maxColor);
+		if(o.data<ddd.min){
+		    dataColor.push(ddd.minColor);
+		} else if(o.data>ddd.max){
+		    dataColor.push(ddd.maxColor);
 		} else{
-		   dataColor.push(ddd.dash.color||'green');
+		   dataColor.push(ddd.color||'black');
 		};
 	    });
-//	    el("mainChart").innerHTML="";
-//	    if (mainChart){mainChart.destroy()};
-//	    var ctx = el(name).getContext('2d');
-	    ddd.charts[ddd.dash.name]= new Chart( el(ddd.dash.name).getContext('2d'), {
+	    c(ddd)
+	    charts[ddd.name]= new Chart( el(ddd.name).getContext('2d'), {
 		type: type,
 		data: {
 		    labels: labels,
 		    datasets: [{
 			    type: type,
 			    fill:false,
-			    label: ddd.dash.group+'-'+ddd.dash.device+'-'+ddd.dash.sensor,
+			    label: ddd.group+'-'+ddd.device+'-'+ddd.sensor,
 			    data: data,
-			    pointBackgroundColor: dataColor,
-			    backgroundColor: ddd.dash.color,
+			    pointBackgroundColor : dataColor,
+			    backgroundColor : dataColor,
+			    fillColors : dataColor,
 			    borderWidth: 1
 		    }]
 		}, options: {
@@ -540,17 +573,25 @@ var dash = {
 	}
     }, template :
 	`<div class="mainDash">
-	    <canvas v-if="i.sensor" v-for="i in selectDash" v-bind:id="i.name"></canvas>
+	    <canvas v-if="i.sensor" v-for="i in selectDash" v-bind:id="i.name">{{i.name}}</canvas>
 	</div>`
 };
-var configUsers = {
-    created : function(){
+var confUsers = {
+    data : function() {
+	return {
+	    users : {}
+	}
+    }, created : function(){
 	    loader(1);
-	    c('created configUsers')
+	    c('created confUsers')
     }, mounted : function () {
-	    c('mounted configUsers')
+	    c('mounted confUsers')
 	    loader(0);
-    }, template :`<div>Users</div>`
+     }, methods : {
+	 getUsers : function () {
+	   return gs('dash') ? JSON.parse(gs('dash')) : [];
+	},
+     }, template :`<div>Users</div>`
 };
 var conf = {
     created : function(){
@@ -623,19 +664,19 @@ var pages = [
     component: dash,
     logo : icon('dashboard')
     },
-    { path: 'configCharts',
+    { path: 'confCharts',
     name: 'Charts',
-    component: configCharts,
+    component: confCharts,
     logo : icon('graph')
     },
-    { path: 'configUsers',
+    { path: 'confUsers',
     name: 'Users',
-    component: configUsers,
+    component: confUsers,
     logo : icon('organization')
     },
-    { path: 'configGroups',
+    { path: 'confGroups',
     name: 'Groups',
-    component: configGroups,
+    component: confGroups,
     logo : icon('package')
     },
     { path: 'blank',
@@ -692,22 +733,25 @@ function  vueFunc(){
     Vue.component('modal', {
 	template: modal
     });
+    Vue.component('modAlert', {
+	template: modAlert
+    });
     vue  = new Vue({
 	router,
 	validations: {}
 	, el: '#app'
 	, data : {
 	    path :"query",
-	    selectInterval : ["minute","5 minutes","30 minutes","1 hour","2 hours","4 hours","8 hours","day","week","month","year"],
-	    selectIntervalVal : [60,300,1800,3600,7200,14400,28800,86400,604800,2629746,31556952],
+	    selectInterval : [60,300,1800,3600,7200,14400,28800,86400,604800,2629746,31556952],
 	    selectChart : ["line","bar"],
-	    showModal : false
+	    showModal : false,
+	    showAlert : false
 	}, created : function (){router.replace('/')
 	}, mounted : function (){
 	}, updated : function (){
 	}, methods : {
-	    showAlert : function(msg){
-		vue.$data.showModal = msg;   
+	    showModAlert : function(msg){
+		vue.$data.showAlert = msg;   
 	    }
 	}
     });
