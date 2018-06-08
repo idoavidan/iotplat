@@ -44,12 +44,12 @@ app.post('/login',
     function(req, res, next) {
         db.update(UserModel,{
 	    username : req.body.username,
-	    password : req.body.password}, {}, 
+	    password : req.body.password}, { __v : 0, password : 0}, 
         function(err, user) {
             if (err) { return res.json("err"); }
             if (!user) { return res.json("no user"); }
             user.token = uidgen.generateSync();
-            db.save(user, (err,user) => res.json({'token':user.token}))
+            db.save(user, (err,user) => res.json({'user':user}))
         });
     }
 );
