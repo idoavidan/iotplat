@@ -472,8 +472,8 @@ var login  = {
 	component: {
 		data : function() {
 			return {
-				username: "max",
-				password: "max",
+				username: "",
+				password: "",
 				token: null,
 				err: null
 			}

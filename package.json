@@ -4,8 +4,8 @@
   "description": "demo server app",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "nodemon index.js"
+    "start": "node backend/merge.js && node index.js",
+    "test": "node backend/merge.js && nodemon index.js"
   },
   "author": "",
   "license": "ISC",
