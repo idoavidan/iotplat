@@ -1,0 +1,6 @@
+{
+    "ignore": ["public/js/main.js"],
+    "events": {
+      "restart": "node backend/merge.js --delay 2.5"
+    }
+  }
