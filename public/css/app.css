@@ -24,9 +24,27 @@ canvas{
 /*login screen*/
 .appLogin{
     grid-area:main;
-    width: 100%;
+    min-width: 200px !important;
+    width:40%;
     text-decoration: none;
     font-weight: bold;
+    height: 120px;
+    border: solid;
+    margin-top:  10%;
+    margin-left:  30%;
+    text-align: center;
+}
+appLogin input,button {
+	width: 120px !important;
+	padding: 20px 10px; line-height: 28px;
+	font-size: 64px;
+	border-radius: 12px;
+	border:solid;
+	border-width:1px;
+	color: white;
+	background-color:LightSlateGray ;
+	padding:0px;
+	margin-top:0px;
 }
 /*main app menu*/
 .appMenu{
@@ -364,7 +382,7 @@ footer {
         max-width: 100% !important;
     }
     .mainMenu select,input[type=color],input[type=text],
-		input[type=date],input[type=number],button {
+		input[type=date],input[type=number],input[type=password],button {
         width: 80% !important;
         max-width: 100% !important;
     }

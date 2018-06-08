@@ -4,31 +4,36 @@ var login  = {
 	component: {
 		data : function() {
 			return {
-				username: "",
-				password: "",
-				token: null,
+				username: this.getUser().username,
+				password: this.getUser().username,
+				token: this.getUser().token,
 				err: null
 			}
 		}, created : function (){
 			c('created login');
-			vue.ls(['user',this.$data.username]);
-			// this.login()
+			if (this.$data.token){vue.nav('/main')}
 		}, mounted : function (){ 
 			c('mounted login');
 		}, updated : function (){
 		}, methods : {
+			getUser:function() {
+				var u = JSON.parse(vue.gs('user')) 
+				return u!==null ? u : {"username": "","password":"","token":""};
+			},
 			login : function () {
 				vue.getData({"path":"login","username": this.$data.username,"password":this.$data.password}, function(err,res){
-				if(res.token){
+				c(res)
+				if(res.user){
+					c(res.user)
+					vue.ls(['user',JSON.stringify(res.user)]);
 					vue.nav('/main');
-					vue.ls(['token',res.token]);
 				} else {
 					c(err);
 				}
 				});
 			}
 		}, template:
-			`<div><form id="formLogin" class="appLogin">
+			`<div><form v-if="!token" id="formLogin" class="appLogin">
 				<div>
 				<label for="username">Username</label>
 				<div v-html="icon('person')"></div>

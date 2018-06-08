@@ -16,7 +16,7 @@ var user = {
     }, mounted : function () {
 	c('mounted user')
 	vue.loader(0);
-    }, template :`<div><form id="form" class="appLogin">
+    }, template :`<div><123><123><form id="form" class="appLogin">
 	    <div>
 		<label for="username">Username</label>
 		<span v-html="icon('person')"></span>
