@@ -75,7 +75,7 @@ var devices = require('./routes/deviceAPI');
 app.use('/feed', devices);
 // TODO mqtt feed
 //query by Index
-
+var main = require('./backend/merge')('./public/js/routes','./public/js/main.js')
 var server = http.listen(process.env.PORT ? process.env.PORT : appData.port, function () {
     c('Example app listening on port '+ (process.env.PORT ? process.env.PORT : appData.port));
 });

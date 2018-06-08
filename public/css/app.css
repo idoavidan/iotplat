@@ -18,6 +18,9 @@ path {
     margin: 0 0 0 0;
     padding: 0px 0px 0px 0px;
 }
+canvas{
+
+}
 /*login screen*/
 .appLogin{
     grid-area:main;
@@ -42,8 +45,8 @@ path {
 .appMain{
     grid-area:main;
     display:grid;
-    grid-template-areas : 'mainMenu mainMain'
-        'xxx mainMain';
+    grid-template-areas : 'mainMenu mainMain';
+    grid-template-columns: 1fr 2fr;
     text-decoration: none;
     font-weight: bold;
     width:95%;
@@ -51,11 +54,12 @@ path {
 }
 .mainMenu{
     grid-area:mainMenu;	
-    max-width : 360px !important;
     display : grid;
     grid-template-columns: repeat(3, 1fr);
     text-decoration: none;
     font-weight: bold;
+    border:solid;
+    border-width:1px;
 }
 .mainMenu svg{
     width:24;
@@ -73,6 +77,9 @@ path {
     padding:0px;
     margin-top:0px;
 }
+.mainMenu option{
+    text-align: center;
+}
 .mainMenu input,button {
 	width: 120px !important;
 	min-height:30px;
@@ -89,7 +96,6 @@ path {
     border-color: red;
     background-color: red;
 }
-}
 .mainMenu input[type=color] {
 	background-color:transparent;
 }
@@ -103,6 +109,11 @@ input:read-only {
     grid-area:mainMain;
     text-decoration: none;
     font-weight: bold;
+    text-transform : capitalize;
+    border: solid;
+    border-width: 1px;
+    border-color: black;
+    background-color: white
 }
 .mainDash{
     grid-area:main;
@@ -116,11 +127,10 @@ input:read-only {
 .mainDash canvas{
     max-width:99%;
     max-height:300px;
-    text-transform : capitalize;
     border: solid;
     border-width: 1px;
     border-color: black;
-    background-color: white;
+    background-color: white
 }
 .lds-dual-ring {
   display: inline-block;
@@ -173,11 +183,8 @@ input:read-only {
     width: 100%; /* Full width */
     border: solid;
     border-width: 1px;
-    height :16px;
+    height :30px;
     background: #070330;
-}
-.menubar:hover{
-    height:30px;
 }
 .menubar svg {
     width:auto;
@@ -221,13 +228,25 @@ input:read-only {
 }
 
 .modal-wrapper {
-  display: table-cell;
-  vertical-align: middle;
+    display: table-cell;
+    vertical-align: top;
+    padding : 20px;
 }
 
 .modal-container {
   width: 200px;
   height: 200px;
+  margin: 0px auto;
+  padding: 20px 30px;
+  background-color: #fff;
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
+  transition: all .3s ease;
+  font-family: Helvetica, Arial, sans-serif;
+}
+.modal-container-alert {
+  width: 200px;
+  height: 40px;
   margin: 0px auto;
   padding: 20px 30px;
   background-color: #fff;
@@ -331,79 +350,29 @@ footer {
         width:100%;
         margin-left: 0;
     }
-    .mainMenu label{
-        display: none;
+    .appMain{
+        margin-top:64px;
+        grid-template-areas : 'mainMenu'
+        'mainMain';
+        grid-template-columns: 1fr;
+    }
+    .appMenu{
+      height:64px;
+    }
+
+    .mainMenu{
+        max-width: 100% !important;
+    }
+    .mainMenu select,input[type=color],input[type=text],
+		input[type=date],input[type=number],button {
+        width: 80% !important;
+        max-width: 100% !important;
     }
     .mainMenu svg{
         width : 32;
         height: 32;
     }
-    
-}
-
-
-
-
-.modal-mask {
-  position: fixed;
-  z-index: 9998;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, .5);
-  display: table;
-  transition: opacity .3s ease;
-}
-
-.modal-wrapper {
-  display: table-cell;
-  vertical-align: middle;
-}
-
-.modal-container {
-  width: 300px;
-  margin: 0px auto;
-  padding: 20px 30px;
-  background-color: #fff;
-  border-radius: 2px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
-  transition: all .3s ease;
-  font-family: Helvetica, Arial, sans-serif;
-}
-
-.modal-header h3 {
-  margin-top: 0;
-  color: #42b983;
-}
-
-.modal-body {
-  margin: 20px 0;
-}
-
-.modal-default-button {
-  float: right;
-}
-
-/*
- * The following styles are auto-applied to elements with
- * transition="modal" when their visibility is toggled
- * by Vue.js.
- *
- * You can easily play with the modal transition by editing
- * these styles.
- */
-
-.modal-enter {
-  opacity: 0;
-}
-
-.modal-leave-active {
-  opacity: 0;
-}
-
-.modal-enter .modal-container,
-.modal-leave-active .modal-container {
-  -webkit-transform: scale(1.1);
-  transform: scale(1.1);
+    .mainDash{
+        display:block;
+    }
 }
