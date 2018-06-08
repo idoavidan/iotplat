@@ -158,7 +158,8 @@ function  vueFunc(){
 			callback(xhr,null);
 		    };
 		};  
-		data.access_token=vue.gs('token');
+		var user = JSON.parse(vue.gs('user'));
+		data.access_token =  user && user.token!==undefined ? user.token : null;
 		xhr.send(JSON.stringify(data)); 
 	    }, el : function (data){
 		return document.getElementById(data);
