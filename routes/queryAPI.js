@@ -48,9 +48,8 @@ router.post('/createGroup', function(req,res){
 
 //users
 router.post('/users', function(req,res){
-    query = {};
-    exclude = {_id : 0, __v : 0, password : 1};
-    db.find(UserModel,query,exclude,(data,err) => errhandle(err,data ,res));	
+    exclude = {_id : 0, __v : 0, password : 0,token : 0};
+    db.find(UserModel,{},exclude,(data,err) => errhandle(err,data ,res));	
 });
 
 router.post('/registerUser', function(req,res){
@@ -85,6 +84,5 @@ router.post('/getGraph', function(req,res){
     query = {username : req.user.username};
     db.findOne(UserModel,query,exclude, (data,err) =>  errhandle(err,data.graphs,res));
 });
-
 
 module.exports = router;
