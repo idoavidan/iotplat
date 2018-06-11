@@ -19,7 +19,7 @@ router.post('/feedsByIndex', function(req,res){
     var query = {};
 	query[req.body.index] = req.body.value;	
 	if(req.body.from !== req.body.to){
-	    query.time = {
+	    query.timeS = {
 		$gt : req.body.from, 
 		$lt : req.body.to 
 	    };

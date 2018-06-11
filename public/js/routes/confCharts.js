@@ -98,7 +98,7 @@ var confCharts = {
 			d = this.$data.dashConfig;
 			if(d.interval && d.sensor){
 			var dt= Date.now();
-			vue.getData({"path":"query/feedsByIndex","index":"sensor","value":d.sensor,
+			vue.getData({"path":"query/feedsByIndex","index":"sensor_id","value":d.sensor,
 				"from":dt/1000-d.interval,"to":dt/1000}
 			, function(err,res){
 				if (res && res.length>0){
