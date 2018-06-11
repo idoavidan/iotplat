@@ -163,7 +163,7 @@ function  vueFunc(){
 		xhr.send(JSON.stringify(data)); 
 	    }, isJson : function (data,alt){
 		try {
-		    return JSON.parse(data) && !!data;
+		    return JSON.parse(data);
 		} catch(e){
 		    return alt;
 		}
