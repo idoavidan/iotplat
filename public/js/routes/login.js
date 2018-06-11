@@ -17,8 +17,8 @@ var login  = {
 		}, updated : function (){
 		}, methods : {
 			getUser:function() {
-				var u = JSON.parse(vue.gs('user')) 
-				return u!==null ? u : {"username": "","password":"","token":""};
+				var u = vue.gs('user');
+				return u!==null && u ? JSON.parse(u) : {"username": "","password":"","token":""};
 			},
 			login : function () {
 				vue.getData({"path":"login","username": this.$data.username,"password":this.$data.password}, function(err,res){

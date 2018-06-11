@@ -158,9 +158,15 @@ function  vueFunc(){
 			callback(xhr,null);
 		    };
 		};  
-		var user = JSON.parse(vue.gs('user'));
+		var user = vue.isJson(vue.gs('user'),{'user':{'token':null}});
 		data.access_token =  user && user.token!==undefined ? user.token : null;
 		xhr.send(JSON.stringify(data)); 
+	    }, isJson : function (data,alt){
+		try {
+		    return JSON.parse(data) && !!data;
+		} catch(e){
+		    return alt;
+		}
 	    }, el : function (data){
 		return document.getElementById(data);
 	    }, ls : function (data){
