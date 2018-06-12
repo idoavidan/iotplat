@@ -38,10 +38,10 @@ var pages = [
     component: blank,
     logo :''
     },
-    { path: 'blank',
+    { path: 'confCharts2',
     name: 'blank4',
-    component: blank,
-    logo :''
+    component: confCharts2,
+    logo : icon('tools')
     },
     { path: 'conf',
     name: 'conf',

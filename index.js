@@ -33,9 +33,9 @@ var UserModel = require('./models/userModel');
 
 passport.use(new Strategy(
     function(token1, cb) {
-    db.findOne(UserModel,{token : token1}, {password : 0},  function(user, err) {
-        if (err) { return cb(err); }
-        if (!user) { return cb(null, false); }
+        db.findOne(UserModel,{token : token1}, {password : 0},  function(user, err) {
+            if (err) { return cb(err); }
+            if (!user) { return cb(null, false); }
         return cb(null, user);
     });
 }));
