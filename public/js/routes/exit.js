@@ -1,11 +1,11 @@
 var exit = {
-    created : function(){
+    created (){
 		vue.loader(1);
 	c('created exit');
 		localStorage.removeItem('user');
-		
-    }, mounted : function () {
-	c('mounted exit')
-	vue.loader(0);
+		vue.nav('/');
+    }, mounted () {
+		c('mounted exit')
+		vue.loader(0);
     }
 };

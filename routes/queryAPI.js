@@ -30,7 +30,7 @@ router.post('/feedsByIndex', function(req,res){
 var GroupModel = require('../models/groupModel');
 
 router.post('/groups', function(req,res){
-    db.find(GroupModel,query = {}, {group_id : 1, _id : 0}, (data,err) => errhandle(err,data ,res));
+    db.find(GroupModel,query = {}, {_v : 0, _id : 0}, (data,err) => errhandle(err,data ,res));
 });
 	
 router.post('/group', function(req,res){
