@@ -63,7 +63,7 @@ var confCharts = {
 				vue.showModAlert('No sensors');
 				return;
 			} else{
-				vue.getData({"path":"query/saveGraph","username":"ido","graph":data}, function(err,res){
+				vue.getData({"path":"query/saveGraph","graph":data}, function(err,res){
 				if(res){
 					vue.showModAlert('dashboard saved');
 					var d = t.getDash();
@@ -99,8 +99,14 @@ var confCharts = {
 			if(d.interval && d.sensor){
 			var dt= Date.now();
 			vue.getData({"path":"query/feedsByIndex","index":"sensor_id","value":d.sensor,
+<<<<<<< HEAD
 				"from":dt/1000-d.interval,"to":dt/1000}
+=======
+				"from":(dt-d.interval*1000),"to":dt}
+>>>>>>> a9f477a7c5727544dc8e403a1044b9d8537783f8
 			, function(err,res){
+				c(err)
+				c(res)
 				if (res && res.length>0){
 				c(res)
 				t.showChart(res);
@@ -120,7 +126,7 @@ var confCharts = {
 			var dataColor = [];
 			var type = ddd.chart ? ddd.chart : this.$data.selectChart[0];
 			msg.map(o => {
-				d = new Date(o.time*1000); // The 0
+				d = new Date(o.timeS); // The 0
 				labels.push(String(d.getHours()).padStart(2,"0")+':'+String(d.getMinutes()).padStart(2,"0")+':'+String(d.getSeconds()).padStart(2,"0"));
 				data.push(o.data);
 				if(o.data<ddd.min){
@@ -180,15 +186,15 @@ var confCharts = {
 		<div><div><span v-html="icon('arrow-down')"></span><label>save</label></div><button v-bind:disabled="!dashConfig.sensor" id="saveDash" @click.prevent="saveDash"><span v-html="icon('arrow-down')"></button></div>
 		<div><div><span v-html="icon('package')"></span><label>groups</label></div>
 		    <select v-if="dashLoad()" id="selectGroup" v-model="dashConfig.group" @change="getGroup()"><option selected value></option><option v-for="i in selectGroups" :value="i.group_id">{{i.group_id}}</option></select>
-		    <input v-else id="selectGroup" v-model="dashConfig.group" readonly></input>
+		    <select v-else id="selectGroup" v-model="dashConfig.group"><option selected :value="dashConfig.group">{{dashConfig.group}}</option></select>
 		</div>
 		<div><div><span v-html="icon('device-mobile')"></span><label>devices</label></div>
 		    <select v-if="dashLoad()" id="selectDevice" v-model="dashConfig.device" @change="changeDevice()"><option selected value></option><option v-for="i in selectDevices" :value="i.device_id">{{i.device_id}}</option></select>
-		    <input v-else id="selectDevice" v-model="dashConfig.device" readonly></input>
+		    <select v-else id="selectDevice" v-model="dashConfig.device"><option selected :value="dashConfig.device">{{dashConfig.device}}</option></select>
 		</div>
 		<div><div><span v-html="icon('pulse')"></span><label>sensors</label></div>
 		    <select v-if="dashLoad()" id="selectSensor" v-model="dashConfig.sensor" @change="changeChart()"><option selected value></option><option v-for="i in selectSensors" :value="i.sensor_id">{{i.sensor_id}}</option></select>
-		    <input v-else id="selectSensor" v-model="dashConfig.sensor" readonly>{{changeChart()}}</input>
+		    <select v-else id="selectSensor" v-model="dashConfig.sensor" @change="changeChart()"><option selected @change="changeChart()" :value="dashConfig.sensor">{{dashConfig.sensor}}</option></select>
 		</div>	
 		<div><div><span v-html="icon('calendar')"></span><label>from</label></div><input id="fromSelect" type="date" placeholder="from"></input></div>
 		<div><div><span v-html="icon('calendar')"></span><label>to</label></div><input id="toSelect" type="date" placeholder="to"></input></div>

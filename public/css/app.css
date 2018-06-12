@@ -4,8 +4,39 @@ body {
     background: linear-gradient(to bottom, #3333cc 0%, #9999ff 100%);
     color:white;
 }
+.danger {
+    color:red;
+}
 path {
-  fill: white;
+    fill: white;
+}
+button {
+    border-radius: 12px;
+    border:solid;
+    border-width:1px;
+    color: white;
+    background-color:LightSlateGray ;
+}
+button:disabled{
+    border-color: red;
+    background-color: red;
+}
+select {
+    width: 120px;
+    min-height:30px;
+    font-size: 150%;
+    border-radius: 12px;
+    border:solid;
+    border-width:1px;
+    color: white;
+    background-color:LightSlateGray ;
+    padding:0px;
+    margin-top:0px;
+}
+.selMulti{
+    display:grid;
+    grid-template-columns: repeat(1fr);
+    height:7em;
 }
 .app {
     display:grid;
@@ -19,33 +50,36 @@ path {
     padding: 0px 0px 0px 0px;
 }
 canvas{
-
 }
 /*login screen*/
 .appLogin{
-    grid-area:main;
+    grid-area:menu;
+    display: grid;
     min-width: 200px !important;
+    min-height: 250px !important;
     width:40%;
     text-decoration: none;
     font-weight: bold;
-    height: 120px;
     border: solid;
-    margin-top:  10%;
+    border-width: 1px;
+    margin-top:  5%;
     margin-left:  30%;
     text-align: center;
 }
-appLogin input,button {
-	width: 120px !important;
-	padding: 20px 10px; line-height: 28px;
-	font-size: 64px;
-	border-radius: 12px;
-	border:solid;
-	border-width:1px;
-	color: white;
-	background-color:LightSlateGray ;
-	padding:0px;
-	margin-top:0px;
+.appLogin button {
+    margin-top:0px;
+    width: 40%;
+    font-weight: bold;
+    height: 32px;
+    margin-top: 20px;
 }
+.appLogin input,label{
+    width: 60%;
+    font-weight: bold;
+    line-height: 32px;
+    height: 32px; /* or whatever height necessary */
+}
+
 /*main app menu*/
 .appMenu{
     display:grid;
@@ -56,9 +90,6 @@ appLogin input,button {
     grid-template-columns: repeat(12, 1fr);
     text-decoration: none;
     font-weight: bold;
-}
-.appMenu img{
-    min-height: 30px;
 }
 .appMain{
     grid-area:main;
@@ -83,36 +114,15 @@ appLogin input,button {
     width:24;
     height:24; 
 }
-.mainMenu select {
-    width: 120px !important;
-    min-height:30px;
-    font-size: 150%;
-    border-radius: 12px;
-    border:solid;
-    border-width:1px;
-    color: white;
-    background-color:LightSlateGray ;
-    padding:0px;
-    margin-top:0px;
-}
 .mainMenu option{
     text-align: center;
 }
 .mainMenu input,button {
-	width: 120px !important;
-	min-height:30px;
-	font-size: 150%;
-	border-radius: 12px;
-	border:solid;
-	border-width:1px;
-	color: white;
-	background-color:LightSlateGray ;
-	padding:0px;
-	margin-top:0px;
-}
-.mainMenu button:disabled{
-    border-color: red;
-    background-color: red;
+    width: 120px;
+    min-height:30px;
+    font-size: 150%;
+    padding:0px;
+    margin-top:0px;
 }
 .mainMenu input[type=color] {
 	background-color:transparent;
@@ -124,7 +134,7 @@ input:read-only {
     background-color: red;
 }
 .mainMain{
-    grid-area:mainMain;
+    grid-area : mainMain;
     text-decoration: none;
     font-weight: bold;
     text-transform : capitalize;
@@ -132,6 +142,15 @@ input:read-only {
     border-width: 1px;
     border-color: black;
     background-color: white
+}
+.main{
+    grid-area:main;
+    display : grid;
+    grid-template-columns: repeat(5, 1fr);
+    text-decoration: none;
+    font-weight: bold;
+    width:95%;
+    margin:2.5%;
 }
 .mainDash{
     grid-area:main;
@@ -167,12 +186,12 @@ input:read-only {
   animation: lds-dual-ring 1.2s linear infinite;
 }
 @keyframes lds-dual-ring {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 .appMain canvas{
     width:90%;
@@ -228,11 +247,6 @@ input:read-only {
     text-align: center;
     align-self: center;
 }
-
-.glyphicon {
-    font-size: 10px;
-}
-
 .modal-mask {
   position: fixed;
   z-index: 9998;
@@ -263,26 +277,25 @@ input:read-only {
   font-family: Helvetica, Arial, sans-serif;
 }
 .modal-container-alert {
-  width: 200px;
-  height: 40px;
-  margin: 0px auto;
-  padding: 20px 30px;
-  background-color: #fff;
-  border-radius: 2px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
-  transition: all .3s ease;
-  font-family: Helvetica, Arial, sans-serif;
+    width: 200px;
+    height: 40px;
+    margin: 0px auto;
+    padding: 20px 30px;
+    background-color: #fff;
+    border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
+    transition: all .3s ease;
+    font-family: Helvetica, Arial, sans-serif;
 }
 
 .modal-header h3 {
-  margin-top: 0;
-  color: #42b983;
+    margin-top: 0;
+    color: #42b983;
 }
 
 .modal-body {
-  margin: 5px 0;
+    margin: 5px 0;
 }
-
 
 /*
  * The following styles are auto-applied to elements with
@@ -363,10 +376,27 @@ footer {
     border-top : solid;
     border-width : 1px;
 }
-@media screen and (max-width:1081px){
+@media only screen and (max-width:1080px){
     .app {
         width:100%;
         margin-left: 0;
+    }
+    .appLogin{
+        width :100%;
+        margin-left:  0%;
+        border-left: none;
+        border-right: none;
+    }
+    .appLogin label,input[type="password"],input[type="text"]  {
+        width: 95%;
+        font-size: 64px !important;
+        line-height: 64px;
+        height: 64px;
+    }
+    .appLogin button{
+        width:80% !important;
+        height: 64px;
+        font-size: 64px;
     }
     .appMain{
         margin-top:64px;
@@ -377,18 +407,31 @@ footer {
     .appMenu{
       height:64px;
     }
-
     .mainMenu{
         max-width: 100% !important;
     }
-    .mainMenu select,input[type=color],input[type=text],
-		input[type=date],input[type=number],input[type=password],button {
-        width: 80% !important;
+    .mainMenu svg{
+        width : 48;
+        height: 48;
+    }
+    select{
+        width: 95% !important;
         max-width: 100% !important;
     }
-    .mainMenu svg{
-        width : 32;
-        height: 32;
+    select,input[type="color"],input[type="text"],
+        input[type="date"],input[type="number"],input[type="password"],button {
+        width: 95% !important;
+        max-width: 100% !important;
+        font-size: 200%;
+        line-height: 64px;
+        height: 64px;
+    }
+    .mainMenu label {
+        display:none;
+    }
+    svg{
+        width : 64;
+        height : 64;
     }
     .mainDash{
         display:block;

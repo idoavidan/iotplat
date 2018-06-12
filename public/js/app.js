@@ -137,8 +137,15 @@ function  vueFunc(){
 		} else {
 		    l.display="none";
 		};
-	    },
-	    showModAlert : function(msg){
+	    }, allowDrop : function (ev) {
+		ev.preventDefault();
+	    }, drag : function (ev) {
+		ev.dataTransfer.setData("text", ev.target.id);
+	    }, drop : function (ev) {
+		ev.preventDefault();
+		var d = ev.dataTransfer.getData("text");
+		ev.target.appendChild(vue.el(d));
+	    }, showModAlert : function(msg){
 		vue.$data.showAlert = msg;   
 	    }, getData : function (data,callback){
 		var xhr = new XMLHttpRequest();
@@ -148,6 +155,10 @@ function  vueFunc(){
 		xhr.onload = function(e) {//Call a function when the state changes.
 		    if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200  && xhr.response.lenght!==0) {
 			callback(null,JSON.parse(xhr.response));
+		    } else if (xhr.status === 401){
+			vue.nav('/main/exit')
+			c(xhr,null);
+			callback(xhr,null);
 		    } else if (xhr.status !== 200){
 			alert('error, please check console');
 			c(xhr,null);

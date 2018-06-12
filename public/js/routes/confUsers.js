@@ -28,12 +28,12 @@ var confUsers = {
 		}
 	}, template :
 	`<div class="appMain">
-	    <div class="mainMenu">
-		<div><div><span v-html="icon('organization')"></span><label>Users</label></div><select v-if="selectUser.length>0" id="selectUser" v-model="user" ><option selected value></option><option v-for="i in selectUser" :value="i">{{i.username}}</option></select></div>
-		</div>
-	    <div class="mainMain">
-		<div><div><span v-html="icon('text-size')"></span><label>name</label></div><input id="username" type="text" v-model="user.username"></input></div>
-		<div><div><span v-html="icon('text-size')"></span><label>active</label></div><input id="active" type="text" v-model="user.active"></input></div>
+	    <div class="main">
+
+		<table>
+		<thead><tr><th>username</th><th>email</th><th>active</th></tr></thead>
+		<tr v-for="i in selectUser"><td>{{i.username}}</td><td>{{i.email}}</td><td>{{i.active}}</td><td></tr>
+		</table>
 		</div>
 	</div>`
 };
