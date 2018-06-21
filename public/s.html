@@ -104,17 +104,17 @@ function Graph(){
     this.graph = this.setConfig(name,data,label)
   };
   this.pushPoint = function(x,y){
-    this.chart.data.labels.push(y);
+    this.chart.data.labels.push(x);
     this.chart.data.datasets.forEach((dataset) => {
       dataset.data.push(x);
     });
-    this.chart.update();
+    this.chart.update(100);
 
     this.chart.data.labels.shift();
     this.chart.data.datasets.forEach((dataset) => {
       dataset.data.shift();
     });
-    this.chart.update();
+    this.chart.update(100);
   };
   this.setConfig= function(name, data,label){
 	  return {
@@ -217,12 +217,11 @@ async function main(){
   init = {
 	device_id : "pi0-10",
     sensor : "am2302T",
-    interval : initerval,
+    interval : initerval * 2,
     canvas : "asd"
   }
   g = new  Graph(init);
-  console.log(g.canvas)
-  postData('query/feedsByIndex', postBody(g))
+  postData('query/feedsByIndex', postBody(g)).catch(error => console.error(error))
   .then(data => {
     values = data.map(d => d.data);
     labels = data.map(d => d.timeS);
@@ -236,8 +235,11 @@ window.onload = async function(){
   socket = io();
   socket.on('connect', function(){
     socket.on('feed', function(data){
+      if((g.device_id == data.device_id)&&(data.sensor_id = g.sensor)){
+
+        g.pushPoint(data.timeS,data.data)
+      }
       // g.updateGraph(data.timeS,data.data);
-      g.pushPoint(data.timeS,data.data)
     });
   });
 
