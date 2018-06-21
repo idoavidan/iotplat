@@ -40,16 +40,16 @@ var moment ;
 //     var v = new View(to,interval);
 //     var c = new Chart(canvas, chartConfig)
 // }  -->
-
-function initG(name){
+// <!-- 
+// function initG(name){
   
-  this.canvas = document.getElementById(name);
-  this.data = []
-  this.d = postData('query/feedsByIndex', postBody({})).then(
-    data => this.data
-  )
-}
-console.log(new initG("am2302T"))
+//   this.canvas = document.getElementById(name);
+//   this.data = []
+//   this.d = postData('query/feedsByIndex', postBody({})).then(
+//     data => this.data
+//   )
+// }
+// console.log(new initG("am2302T")) -->
 
 function Graph(){
   this.creationTime = Date.now();
@@ -99,7 +99,20 @@ function Graph(){
     this.data.data = data;
     this.data.label = label;
     this.graph = this.setConfig(name,data,label)
-  }
+  };
+  this.pushPoint = function(x,y){
+    this.chart.data.labels.push(y);
+    this.chart.data.datasets.forEach((dataset) => {
+      dataset.data.push(x);
+    });
+    this.chart.update();
+
+    this.chart.data.labels.shift();
+    this.chart.data.datasets.forEach((dataset) => {
+      dataset.data.shift();
+    });
+    this.chart.update();
+  };
   this.setConfig= function(name, data,label){
 	  return {
       nameItem: name,
@@ -219,7 +232,8 @@ window.onload = async function(){
   socket = io();
   socket.on('connect', function(){
     socket.on('feed', function(data){
-      g.updateGraph(data.timeS,data.data);
+      // g.updateGraph(data.timeS,data.data);
+      g.pushPoint(data.timeS,data.data)
     });
   });
 
