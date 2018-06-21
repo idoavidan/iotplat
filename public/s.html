@@ -2,31 +2,248 @@
 <html>
   <head>
     <title>Socket.IO chat</title>
-    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Helvetica, Arial; }
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
-      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages li { padding: 5px 10px; }
-      #messages li:nth-child(odd) { background: #eee; }
-    </style>
+   
   </head>
   <script src="/socket.io/socket.io.js"></script>
-<script>
-  var socket = io();
+  <script src="./js/moment.js"></script>
+  <script src="./js/Chart.min.js"></script>
+  
+  <script>
+const postBody = (f) => 
+{
+  return {      
+    "index": 'sensor_id',
+        "value": f.sensor,
+        "from": f.from,
+        "to": f.to,
+        "access_token": 'CGy7CzLgyHecKxN3hTRqiD' 
+      }
+    }
+var moment ;
+
+
+// <!-- 
+// function Buffer(x,y){
+//   this.x = [...x];
+//   this.y = [...y];
+// }
+
+// function View(to,interval){
+//   this.to = to;
+//   this.from = to - interval;
+// }
+
+// chartConfig = () => ({});
+
+// function G(...init){
+//     var b = new Buffer(label,data);
+//     var v = new View(to,interval);
+//     var c = new Chart(canvas, chartConfig)
+// }  -->
+
+function initG(name){
+  
+  this.canvas = document.getElementById(name);
+  this.data = []
+  this.d = postData('query/feedsByIndex', postBody({})).then(
+    data => this.data
+  )
+}
+console.log(new initG("am2302T"))
+
+function Graph(){
+  this.creationTime = Date.now();
+  this.sensor = init.sensor;
+  this.data = [];
+  this.interval = init.interval;
+  this.from = this.creationTime - this.interval;
+  this.to = this.creationTime;
+  this.earliest = 0;
+  this.latest = 0;
+  this.graph = {};
+  this.chart = {};
+  this.canvas = document.getElementById(init.canvas);
+  
+  this.initGraph = function(labels,values){
+    this.setViewInterval(Math.max(...labels),Math.min(...labels))
+    this.setDataInterval(this.to,this.from - this.interval*3)
+    this.setGraph(this.sensor,values,labels);
+    this.chart = new Chart(this.canvas, this.graph);
+  };
+  this.updateGraph = function(labels,values){
+    this.chart.config.data.labels = labels;
+    this.chart.config.data.datasets.forEach((dataset) => {
+        dataset.data = values;
+    });
+    this.chart.update(100);  
+  };
+  this.setViewInterval = function(to){
+    this.from = to - this.interval;
+    this.to = to
+  };
+  this.setDataInterval = function(to,from){
+    if (from < this.earliest || this.earliest === 0){ 
+      this.earliest = from; ;}
+    if (to > this.latest){ this.latest = to;};  
+  };
+  this.setInterval = function(interval){
+    this.interval = interval;
+    this.from = this.to - interval;
+  }
+  this.needServer = function(){
+    console.log((this.from < this.earliest),(this.to > this.latest))
+      return ((this.from < this.earliest)||(this.to > this.latest))
+  };
+
+  this.setGraph = function(name,data,label){
+    this.data.data = data;
+    this.data.label = label;
+    this.graph = this.setConfig(name,data,label)
+  }
+  this.setConfig= function(name, data,label){
+	  return {
+      nameItem: name,
+      type: 'line',
+      data: {
+        labels: label,
+        datasets: [{
+          type: "line",
+          fill:false,
+          label: name,
+          data: data,
+          pointBackgroundColor : "black",
+          backgroundColor : "yellow",
+          fillColors : "green",
+          borderWidth: 4
+        }]
+      }, options: {
+        ticks : {
+          source : "labels",
+        },
+        scales: {
+          xAxes: [{
+            type : "time",
+            fontSize : 30
+            }],
+          yAxes: [{
+            display: true,
+            ticks: {
+                suggestedMin: 0,    // minimum will be 0, unless there is a lower value.
+                suggestedMax : 40,
+                stepSize: 2
+
+            }
+          }]
+        },
+        tooltips: {
+          enabled : false
+        }
+      }
+    };
+  };
+}
+
+
+
+
+async function postData(url, data) {
+  // Default options are marked with *
+  return fetch(url, {
+    body: JSON.stringify(data), // must match 'Content-Type' header
+    cache: 'force-cache', // *default, no-cache, reload, force-cache, only-if-cached
+    credentials: 'same-origin', // include, same-origin, *omit
+    headers: {
+      'user-agent': 'Mozilla/4.0 MDN Example',
+      'content-type': 'application/json'
+    },
+    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+    mode: 'cors', // no-cors, cors, *same-origin
+    redirect: 'follow', // manual, *follow, error
+    referrer: 'no-referrer', // *client, no-referrer
+  })
+  .then(response => response.json()) // parses response to JSON
+}
+
+
+
+function setInterval(e){
+  g.setInterval(e);
+  update();
+};
+
+function gotonow(){
+  g.setViewInterval(Date.now());
+  update();
+}
+
+function update(post){
+  postData('query/feedsByIndex', postBody(g))
+  .then(data => {
+    values = data.map(d => d.data);
+    labels = data.map(d => d.timeS);
+    g.updateGraph(labels,values)    
+    }).catch(error => console.error(error))
+};
+
+function moveOnGraph(x){
+  newval = (g.interval) * x ;
+  newTo = g.to + newval;
+  newFrom = g.from + newval;
+  g.setViewInterval(newTo);
+  update();
+}
+
+// canvasClick = 
+
+async function main(){
+  var initerval = document.getElementById("timeScale").value
+  
+  init = {
+    sensor : "am2302T",
+    interval : initerval,
+    canvas : "asd"
+  }
+  g = new  Graph(init);
+  console.log(g.canvas)
+  postData('query/feedsByIndex', postBody(g))
+  .then(data => {
+    values = data.map(d => d.data);
+    labels = data.map(d => d.timeS);
+    g.initGraph(labels,values);
+  }).catch(error => console.error(error)) 
+};
+
+window.onload = async function(){
+  await main()
+
+  socket = io();
   socket.on('connect', function(){
-  socket.on('feed', function(data){
-    console.log(data);
+    socket.on('feed', function(data){
+      g.updateGraph(data.timeS,data.data);
+    });
   });
-  });
+
+  g.canvas.onmousedown = function(e){
+    canvasHalf = g.canvas.width/2;
+    intervalDelta = e.x - canvasHalf;
+    x = (1 - ((g.canvas.width -  intervalDelta) / g.canvas.width))* 2; 
+    moveOnGraph(x)
+  }
+}
+
 </script>
   <body>
-    <ul id="messages"></ul>
-    <form action="">
-      <input id="m" autocomplete="off" /><button>Send</button>
-    </form>
+    <canvas  id=asd width =800 height=300></canvas>
+    <select id=timeScale onchange="setInterval(this.value)">
+      <optgroup label = "Choose Time Frame">
+            <option value=1.8e+6>30m</option>
+            <option value=7.2e+6 selected="selected">2h</option>
+            <option value=1.44e+7>4h</option>
+            <option value=8.64e+7>1d</option>
+            <option value=1.296e+8>3d</option>
+          </optgroup>
+      </select>
+    <button onclick="gotonow()">Go To Live</button>
   </body>
 </html>
     
