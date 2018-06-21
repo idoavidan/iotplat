@@ -1,15 +1,17 @@
-/*global*/ 
+//global 
 body {
     margin : 0px;
     background: linear-gradient(to bottom, #3333cc 0%, #9999ff 100%);
-    color:white;
-}
-.danger {
-    color:red;
+    color : white;
 }
 path {
     fill: white;
 }
+/*
+.danger {
+    color:red;
+}
+
 button {
     border-radius: 12px;
     border:solid;
@@ -51,7 +53,7 @@ select {
 }
 canvas{
 }
-/*login screen*/
+login screen
 .appLogin{
     grid-area:menu;
     display: grid;
@@ -77,15 +79,15 @@ canvas{
     width: 60%;
     font-weight: bold;
     line-height: 32px;
-    height: 32px; /* or whatever height necessary */
+    height: 32px;  or whatever height necessary 
 }
 
-/*main app menu*/
+main app menu
 .appMenu{
     display:grid;
     grid-area:menu;
     max-height: 50px;
-    position: fixed; /* Set the navbar to fixed position */
+    position: fixed;  Set the navbar to fixed position 
     top: 16px;
     grid-template-columns: repeat(12, 1fr);
     text-decoration: none;
@@ -127,7 +129,7 @@ canvas{
 .mainMenu input[type=color] {
 	background-color:transparent;
 }
-input:-moz-read-only { /* For Firefox */
+input:-moz-read-only {  For Firefox 
     border-color: red;
 }
 input:read-only { 
@@ -167,7 +169,7 @@ input:read-only {
     border: solid;
     border-width: 1px;
     border-color: black;
-    background-color: white
+    background-color: white;
 }
 .lds-dual-ring {
   display: inline-block;
@@ -212,12 +214,12 @@ input:read-only {
     background-color:#E0E0E0;
     height:auto;
 }
-/* The navigation bar */
+ The navigation bar 
 .menubar{
-    position: fixed; /* Set the navbar to fixed position */
+    position: fixed;  Set the navbar to fixed position 
     overflow: hidden;    
-    top: 0; /* Position the navbar at the top of the page */
-    width: 100%; /* Full width */
+    top: 0;  Position the navbar at the top of the page 
+    width: 100%;  Full width 
     border: solid;
     border-width: 1px;
     height :30px;
@@ -228,14 +230,14 @@ input:read-only {
     height: 100%;
 }
 .menubar a:hover{
-    /*max-height: 30px;*/
+    max-height: 30px;
      background-color: #ddd;
 }
 .menubar a.router-link-active {
     background-color: #150a84;
 }
 .thead{
-    top: 70px; /* Position the navbar at the top of the page */
+    top: 70px;  Position the navbar at the top of the page 
 }
 .thead-inverse th {
             color: #fff;
@@ -266,8 +268,8 @@ input:read-only {
 }
 
 .modal-container {
-  width: 200px;
-  height: 200px;
+  width: 400px;
+  height: auto;
   margin: 0px auto;
   padding: 20px 30px;
   background-color: #fff;
@@ -275,6 +277,7 @@ input:read-only {
   box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
   transition: all .3s ease;
   font-family: Helvetica, Arial, sans-serif;
+  color:black;
 }
 .modal-container-alert {
     width: 200px;
@@ -297,14 +300,14 @@ input:read-only {
     margin: 5px 0;
 }
 
-/*
+
  * The following styles are auto-applied to elements with
  * transition="modal" when their visibility is toggled
  * by Vue.js.
  *
  * You can easily play with the modal transition by editing
  * these styles.
- */
+ 
 
 .modal-enter {
   opacity: 0;
@@ -318,14 +321,14 @@ input:read-only {
   -webkit-transform: scale(1.1);
   transform: scale(1.1);
 }
-/* Style the tab */
+ Style the tab 
 div.tab {
     overflow: hidden;
     border: 1px solid #ccc;
     background-color: #f1f1f1;
 }
 
-/* Style the buttons inside the tab */
+ Style the buttons inside the tab 
 div.tab button {
     background-color: inherit;
     float: left;
@@ -336,17 +339,17 @@ div.tab button {
     transition: 0.3s;
 }
 
-/* Change background color of buttons on hover */
+ Change background color of buttons on hover 
 div.tab button:hover {
     background-color: #ddd;
 }
 
-/* Create an active/current tablink class */
+ Create an active/current tablink class 
 div.tab button.active {
     background-color: #ccc;
 }
 
-/* Style the tab content */
+ Style the tab content 
 .tabcontent {
     display: none;
 }
@@ -418,7 +421,7 @@ footer {
         width: 95% !important;
         max-width: 100% !important;
     }
-    select,input[type="color"],input[type="text"],
+    input[type="color"],input[type="text"],
         input[type="date"],input[type="number"],input[type="password"],button {
         width: 95% !important;
         max-width: 100% !important;
@@ -436,4 +439,4 @@ footer {
     .mainDash{
         display:block;
     }
-}
+}*/

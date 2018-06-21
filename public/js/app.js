@@ -1,5 +1,5 @@
 var c = console.log.bind(console);
-var vue
+var vue;
 //var myWorker = new Worker('./js/app2.js');
 function addScript(data,callback) {
     var s = document.createElement('script');
@@ -21,6 +21,7 @@ function getFile(data,callback){
 	blob,
 	fileReader = new FileReader();
     xhr.open("GET", data.path, true);
+    xhr.timeout=10000;
     //Send the proper header information along with the request
     // xhr.responseType = "application/javascript";
     xhr.onload = function(e) {//Call a function when the state changes.
@@ -31,12 +32,16 @@ function getFile(data,callback){
 	    };
 	    fileReader.readAsDataURL(blob);
 	} else if (xhr.status !== 200){
-	    alert('error, please check console');
+	    vue.tstW('error '+xhr.status+' , please check console');
 	    c(xhr);
 	} else {
-	    alert('error, please check console');
+	    vue.tstW('error, please check console');
 	    c(xhr);
 	};
+    };
+    xhr.ontimeout = function (e){
+	vue.tstW('Timeout, please check connection');
+	callback('timeout',null);
     };
     xhr.send(JSON.stringify(data)); 
 };
@@ -44,64 +49,14 @@ function getFile(data,callback){
 function start(){
     addScript({"path":"./js/vue.min.js","name":"vue.min.js"},function(){
 	 addScript({"path":"./js/vue-router.js","name":"vue-router.js"},function(){
-	     vueFunc()
-	 });
+	    addScript({"path":"/socket.io/socket.io.js","name":"socket.io.js"},function(){
+		vueFunc()
+	    });
+	});
     });
 };
 start();
 var mainChart;
-var modal = 
-    `<transition name="modal">
-	<div class="modal-mask">
-	  <div class="modal-wrapper">
-	    <div class="modal-container">
-	      <div class="modal-header">
-		<slot name="header">
-		  default header
-		</slot>
-	      </div>
-	      <div class="modal-body">
-		<slot name="body">
-		  default body
-		</slot>
-	      </div>
-	      <div class="modal-footer">
-		<slot name="footer">
-		  default footer
-		  <button class="modal-default-button" @click="$emit('close')">
-		    OK
-		  </button>
-		</slot>
-	      </div>
-	    </div>
-	  </div>
-	</div>
-      </transition>`;
-var modAlert = 
-    `<transition name="modal">
-	<div class="modal-mask">
-	  <div class="modal-wrapper">
-	    <div class="modal-container-alert">
-	      <div class="modal-header">
-		<slot name="header">
-		</slot>
-	      </div>
-	      <div class="modal-body">
-		<slot name="body">
-		</slot>
-	      </div>
-	      <div class="modal-footer">
-		<slot name="footer">
-		  <button class="modal-default-button" @click="$emit('close')">
-		    OK
-		  </button>
-		</slot>
-	      </div>
-	    </div>
-	  </div>
-	</div>
-      </transition>`
-;
 function  vueFunc(){
     var router = new VueRouter({
 	mode: 'abstract',
@@ -110,33 +65,41 @@ function  vueFunc(){
 	    main
 	]
     });
-    Vue.component('modal', {
-	template: modal
-    });
-    Vue.component('modAlert', {
-	template: modAlert
-    });
     vue  = new Vue({
 	router,
+	components:[],
 	validations: {}
 	, el: '#app'
 	, data : {
 	    path :"query",
 	    selectInterval : [60,300,1800,3600,7200,14400,28800,86400,604800,2629746,31556952],
-	    selectChart : ["line","bar"],
-	    showModal : false,
-	    showAlert : false
+	    selectChart : ['line','bar','pie','doughnut','map'],
+	    isLoader : false,
+	    isUserModal: false
 	}, created : function (){
+	    Vue.use(Buefy.default);    
+	    var socket = io();
+	    socket.on('connect', function(){
+		socket.on('feed', function(data){
+		    console.log(data);
+		});
+	    });
 	}, mounted : function (){router.replace('/')
 	}, updated : function (){
 	}, methods : {
-	    loader : function (data){
-		var l = vue.el('loader').style;
-		if (data===1){
-		    l.display=""
-		} else {
-		    l.display="none";
-		};
+	    logout :function(){
+		localStorage.removeItem('user');
+		vue.nav('/');
+	    }, tstS (msg){
+		this.$toast.open({
+                    message: msg,
+                    type: 'is-success'
+                })
+	    }, tstW (msg){
+		this.$toast.open({
+                    message: msg,
+                    type: 'is-danger'
+                })
 	    }, allowDrop : function (ev) {
 		ev.preventDefault();
 	    }, drag : function (ev) {
@@ -145,30 +108,33 @@ function  vueFunc(){
 		ev.preventDefault();
 		var d = ev.dataTransfer.getData("text");
 		ev.target.appendChild(vue.el(d));
-	    }, showModAlert : function(msg){
-		vue.$data.showAlert = msg;   
-	    }, getData : function (data,callback){
+	    }, getData : async function (data,callback){
 		var xhr = new XMLHttpRequest();
 		xhr.open("POST", data.path, true);
+		xhr.timeout=10000;
 		//Send the proper header information along with the request
 		xhr.setRequestHeader("Content-type", "application/json");
 		xhr.onload = function(e) {//Call a function when the state changes.
 		    if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200  && xhr.response.lenght!==0) {
 			callback(null,JSON.parse(xhr.response));
 		    } else if (xhr.status === 401){
-			vue.nav('/main/exit')
+			vue.logout();
 			c(xhr,null);
 			callback(xhr,null);
 		    } else if (xhr.status !== 200){
-			alert('error, please check console');
+			vue.tstW('error, please check console');
 			c(xhr,null);
 			callback(xhr,null);
 		    } else {
-			alert('error, please check console');
+			vue.tstW('error, please check console');
 			c(xhr,null)
 			callback(xhr,null);
 		    };
 		};  
+		xhr.ontimeout = function (e){
+		    vue.tstW('Timeout, please check connection');
+		    callback('timeout',null);
+		};
 		var user = vue.isJson(vue.gs('user'),{'user':{'token':null}});
 		data.access_token =  user && user.token!==undefined ? user.token : null;
 		xhr.send(JSON.stringify(data)); 
@@ -185,7 +151,7 @@ function  vueFunc(){
 		    localStorage.setItem(data[0],data[1]);
 		    return true;
 		} catch(e){
-		    vue.showModAlert('Please allow cookies')	
+		    vue.showModAlert('Please allow cookies');
 		    return false;
 		};
 	    }, gs : function (data){
