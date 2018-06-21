@@ -28,37 +28,34 @@ var login  = {
 						vue.ls(['user',JSON.stringify(res.user)]);
 						vue.nav('/main');
 					} else {
-						d.err='wrong details'
+						vue.tstW('Wrong details')
 					}
 					});
 				}
 				else {
-					d.err='please fill all details'
+					vue.tstW('Details missing')
 				}
 			}
 		}, template:
-			`<div>
-				<form v-if="!token" id="formLogin" class="appLogin">
-					<div>
-					<span v-html="icon('person')"></span>
-					<label for="username">Username</label>		
-					</div><div>
-					<input type="text"  v-model="username" id="username" name="username" class="input-text" v-validate="'required'"/>
-					</div>
-					<div>
-					<span v-html="icon('lock')"></span>
-					<label for="password">Password</label>
-					</div>
-					<div>
-						<input type="password" v-model="password" id="password" name="password" class="input-text" v-validate="'required'"></input>
-					</div>
-					<div></div>
-					<div>
-						<button @click.prevent="login" class="btn btn-danger">Login</button>
-					</div>
-					<div v-if="err" class="danger" id ="err">{{err}}</div>
-				</form>
-			<div style="text-align: center"><img src="./img/logo.png"></img></div>
-			</div>` 
+			`<div >
+			
+			<section class="section">      
+				<form v-if="!token" id="formLogin" class="container column is-4 is-offset-4">
+				    <b-field label="username">
+            <b-input v-model="username" icon="account"></b-input>
+        </b-field>
+		<b-field label="password" >
+            <b-input type="password" icon="lock-question"
+                v-model="password"
+                password-reveal>
+            </b-input>
+        </b-field>
+		<div style="text-align: center" > 
+			<button class="button is-dark is-medium " @click.prevent="login">Login</button>
+		</div>
+		<div style="text-align: center"><img src="./img/logo.png"></img></div>
+		</section>
+			
+	</div>` 
 	}
 };

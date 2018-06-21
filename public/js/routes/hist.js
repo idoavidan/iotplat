@@ -1,9 +1,9 @@
-var confGroups = {
+var hist = {
 	data () {
 		return {
 			defaultSortDirection: 'desc',
+			activeTab:0,
 			group : '',
-			activeTab :0,
 			groupColumns: [{
 				field: 'group_id',
 				label: 'ID',
@@ -70,34 +70,6 @@ var confGroups = {
     }, template :
 	`<div>
 		<b-tabs type="is-boxed" v-model="activeTab" @change="">
-			<b-tab-item label="Groups" icon="group">
-			<b-tabs type="is-boxed" @change="">
-			<b-tab-item label="New" icon="group">
-				<b-table bordered narrowed
-				:data="selectGroups"
-				:columns="groupColumns"
-				focusable class="column"
-				:selected.sync="group"
-				></b-table>
-			</b-tab-item>
-			<b-tab-item label="Groups" icon="group">
-				<b-table bordered narrowed
-				:data="selectGroups"
-				:columns="groupColumns"
-				focusable class="column"
-				:selected.sync="group"
-				></b-table>
-			</b-tab-item>
-			<b-tab-item label="Edit" icon="group">
-				<b-table bordered narrowed
-				:data="selectGroups"
-				:columns="groupColumns"
-				focusable class="column"
-				:selected.sync="group"
-				></b-table>
-			</b-tab-item>
-			</b-tabs>
-			</b-tab-item>
 			<b-tab-item label="Devices" icon="cellphone-link">
 			<b-table
 				:data="group.group_devices"

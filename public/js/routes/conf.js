@@ -1,9 +1,9 @@
 var conf = {
     created (){
-		vue.loader(1);
+		vue.$data.isLoader=true;
 		c('created conf')
     }, mounted () {
 	    c('mounted conf')
-	    vue.loader(0);
+	    vue.$data.isLoader=false;
     }, template : `<div>Configuration<div>`
 };

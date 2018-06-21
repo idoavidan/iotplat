@@ -1,9 +1,9 @@
 var blank = {
     created : function(){
-	vue.loader(1);
+	vue.$data.isLoader=true;
 	c('created blank')
     }, mounted : function () {
 	c('mounted balnk')
-	vue.loader(0);
+	vue.$data.isLoader=false;
     }, template :`<div></div>`
 };

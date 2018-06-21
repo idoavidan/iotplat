@@ -5,14 +5,16 @@
    
   </head>
   <script src="/socket.io/socket.io.js"></script>
-  <script src="./js/moment.js"></script>
+  <script src="./js/moment.min.js"></script>
   <script src="./js/Chart.min.js"></script>
   
   <script>
 const postBody = (f) => 
 {
   return {      
-    "index": 'sensor_id',
+		"parent":"device_id",
+		"parentVal":f.device_id,
+		"index": 'sensor_id',
         "value": f.sensor,
         "from": f.from,
         "to": f.to,
@@ -40,6 +42,7 @@ var moment ;
 //     var v = new View(to,interval);
 //     var c = new Chart(canvas, chartConfig)
 // }  -->
+<<<<<<< HEAD
 // <!-- 
 // function initG(name){
   
@@ -50,10 +53,14 @@ var moment ;
 //   )
 // }
 // console.log(new initG("am2302T")) -->
+=======
+
+>>>>>>> 6bc11aebcad8c2f9892b5f46774434d41b15a332
 
 function Graph(){
   this.creationTime = Date.now();
   this.sensor = init.sensor;
+  this.device_id = init.device_id;
   this.data = [];
   this.interval = init.interval;
   this.from = this.creationTime - this.interval;
@@ -212,6 +219,7 @@ async function main(){
   var initerval = document.getElementById("timeScale").value
   
   init = {
+	device_id : "pi0-10",
     sensor : "am2302T",
     interval : initerval,
     canvas : "asd"

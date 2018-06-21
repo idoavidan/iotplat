@@ -1,62 +1,33 @@
 var pages = [
 	{ path: 'dash',
-    name: 'dashboard',
+    name: 'Dashboard',
 	component: dash ,
-    logo : icon('dashboard')
+    icon : 'speedometer'
     },
     { path: 'confCharts',
     name: 'Charts',
     component: confCharts,
-    logo : icon('graph')
+     icon : 'finance'
     },
+    { path: 'history',
+    name: 'History',
+    component: hist,
+     icon : 'view-list'
+    },	
     { path: 'confUsers',
     name: 'Users',
     component: confUsers,
-    logo : icon('organization')
+    icon : 'account-multiple'
     },
     { path: 'confGroups',
     name: 'Groups',
     component: confGroups,
-    logo : icon('package')
-    },
-    { path: 'test',
-    name: 'blank0',
-    logo :''
-    },
-    { path: 'blank',
-    name: 'blank1',
-    component: blank,
-    logo :''
-    },
-    { path: 'blank',
-    name: 'blank2',
-    component: blank,
-    logo :''
-    },
-    { path: 'blank',
-    name: 'blank3',
-    component: blank,
-    logo :''
-    },
-    { path: 'blank',
-    name: 'blank4',
-    component: blank,
-    logo :''
+    icon : 'group'
     },
     { path: 'conf',
-    name: 'conf',
+    name: 'Configuration',
     component: conf,
-    logo : icon('tools')
-    },
-    { path: 'user',
-    name: 'user',
-    component: user,
-    logo : icon('person')
-    },
-    { path: 'exit',
-    name: 'exit',
-    component: exit,
-    logo : icon('sign-out')
+    icon : 'wrench'
     }
 ];
 var main = { 
@@ -66,29 +37,55 @@ var main = {
 	component: {
 		data (){
 			return {
-				isActive: true,
-				hasError: false
+				navIsActive: false,
+				isUserModal:false,
+				user: vue.isJson(vue.gs('user'),{'user':''})
 			}
 		}, created : function(){
 			c('created main')
 			addScript({"path":"./js/moment.min.js","name":"moment.min.js"},function(){
-				vue.nav('/main/confGroups')
+				vue.nav('/main/confCharts')
 			});
-		}, mounted : function () {
+		}, mounted () {
+			Vue.component('userModal', userModal);
+			// vue.$components.push(userModal);
 		}, methods : {
-		changePage : function (e) {
-			vue.nav('/main/'+e);
-		}
+			changePage (e) {
+				vue.nav('/main/'+e);
+				vue.$data.isLoader=true;
+			},toggleMenu: function () {
+				this.navIsActive = !this.navIsActive
+			}
 		}, template :
-		`<div><div id="loader" class="lds-dual-ring centered"></div>
-			<modAlert v-if="vue.$data.showAlert" @close="vue.$data.showAlert = false">
-			<h3 id="modAlert" slot="header">{{vue.$data.showAlert}}</h3>
-			</modAlert>
-			<modal v-if="vue.$data.showModal" @close="vue.$data.showModal = false">
-			<h3 id="modModal" slot="header">{{vue.$data.showModal}}</h3>
-			</modal>
-			 <div name="bar"><div class="appMenu menubar" role="navigation"> <router-link v-for="rec in pages" :to="{ name: rec.name }"><span v-html="rec.logo"></span></a> </li></div></div>
-			<router-view></router-view>
-		</div>`
+		`<div>
+		<b-loading :is-full-page="true" :active.sync="vue.$data.isLoader" :can-cancel="false"></b-loading>
+		<nav class="navbar is-dark is-fixed-top " role="navigation" aria-label="main navigation">
+		<div class="navbar-brand">
+			<a role="button" class="navbar-burger burger" @click="toggleMenu" 
+			style="color:white" :class="{'is-active': navIsActive}" data-target="mainNav"
+			aria-label="menu" aria-expanded="false">
+			  <span aria-hidden="true"></span>
+			  <span aria-hidden="true"></span>
+			  <span aria-hidden="true"></span>
+			</a>
+		</div>
+		<div id="mainNav" class="navbar-menu is-Danger" :class="{'is-active': navIsActive}">
+			<div class="navbar-start">
+				<div class="nav-item" v-for="rec in pages">
+					<button class="button is-dark is-fullwidth" @click.prevent="vue.nav('/main/'+rec.path)">
+					<b-icon :icon="rec.icon"></b-icon><span>{{rec.name}}</span></button>
+				</div>
+			</div>
+			<div class="navbar-end">
+				<button class="nav-item button is-dark is-fullwidth" @click="isUserModal = true"><b-icon icon="account"></b-icon></button>
+				<button class="nav-item button is-dark is-fullwidth" @click="vue.logout"><b-icon icon="logout"></b-icon></button>
+			</div>
+		</div>
+		</nav>
+		<router-view></router-view>
+		<b-modal :active.sync="isUserModal" has-modal-card >
+            <userModal v-bind="user"></userModal>
+        </b-modal>
+	</div>`
 	}
 }
