@@ -235,7 +235,9 @@ window.onload = async function(){
   socket = io();
   socket.on('connect', function(){
     socket.on('feed', function(data){
+      console.log(data)
       if((g.device_id == data.device_id)&&(data.sensor_id = g.sensor)){
+        console.log(data)
 
         g.pushPoint(data.timeS,data.data)
       }
