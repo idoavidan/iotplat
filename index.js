@@ -69,7 +69,7 @@ app.post('*',auth, (req, res) => {
 app.get('*',auth, (req, res) => {
 });
 app.get('/ws', (req, res) => {
-    res.sendFile(__dirname+'/public/s.html');
+    res.sendFile(__dirname+'/public/d.html');
 });
 
 app.get('*', (req, res) => {
@@ -85,6 +85,7 @@ app.use('/feed', devices);
 // TODO mqtt feed
 //query by Index
 var server;
+console.log(process.env)
 if (process.env.PORT){
     server = http.listen(process.env.PORT , function () {
 	c('App listening on port '+ (process.env.PORT));

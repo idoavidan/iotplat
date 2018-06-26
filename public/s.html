@@ -22,36 +22,40 @@ const postBody = (f) =>
       }
     }
 var moment ;
+//ws emit
+
+// get name and buffer length
+// buffer
+// get bufferView
+// buffer wsController
+//get chart controller
+//get chart
+//get viewController
+//get view
 
 
-// <!-- 
-// function Buffer(x,y){
-//   this.x = [...x];
-//   this.y = [...y];
-// }
 
-// function View(to,interval){
-//   this.to = to;
-//   this.from = to - interval;
-// }
+function Buffer(x,y){
+  this.x = [...x];
+  this.y = [...y];
+  this.addPoint = function(label,data){
+    this.x = label.push(label);
+    this.y = label.push(data);
+  }
+}
 
-// chartConfig = () => ({});
+function View(to,interval){
+  this.to = to;
+  this.from = to - interval;
+}
 
-// function G(...init){
-//     var b = new Buffer(label,data);
-//     var v = new View(to,interval);
-//     var c = new Chart(canvas, chartConfig)
-// }  -->
-// <!-- 
-// function initG(name){
-  
-//   this.canvas = document.getElementById(name);
-//   this.data = []
-//   this.d = postData('query/feedsByIndex', postBody({})).then(
-//     data => this.data
-//   )
-// }
-// console.log(new initG("am2302T")) -->
+chartConfig = () => ({});
+
+function G(...init){
+    var b = new Buffer(label,data);
+    var v = new View(to,interval);
+    var c = new Chart(canvas, chartConfig)
+} 
 
 function Graph(){
   this.creationTime = Date.now();
