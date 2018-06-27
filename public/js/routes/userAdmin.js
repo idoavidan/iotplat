@@ -3,6 +3,7 @@ const userAdmin = {
 			return {
 				pass:'',
 				activeTab: 0,
+				roles:['','device','user','admin'],
 				tabColumns: [
 				{
 					field: 'name',
@@ -55,23 +56,49 @@ const userAdmin = {
 				}
 			]
 		}
-		}, props: ['name','email','username','active','admin','graphs']
-		, template: `
+		}, props: ['user']
+		, mounted () {
+			c(this.$props)
+		}, methods :{
+			compEvent(d){
+				this.$emit('compEvent',d);
+			}
+		} , template: `
             <form action="">
 				<section>
+				<nav class="level" >
+					<div class="level-left">
+						<div class="level-item">
+							<button class="button is-dark is-medium" @click.prevent="compEvent('save')">
+								<b-icon icon="content-save"></b-icon></button></button>
+						</div>
+						<div class="level-item">
+							<button class="button is-danger is-medium" @click.prevent="$parent.close()">
+								<b-icon icon="cancel"></b-icon></button></button>
+						</div>
+					</div>
+					<div class="level-right"></div>
+				</nav>
 				<b-tabs type="is-boxed" v-model="activeTab">
 					<b-tab-item label="General" icon="account">
 						<b-field label="Name">
 							<b-input
-								:value="name"
+								:value="user.name"
 								placeholder="name"
+								required>
+							</b-input>
+						</b-field>
+						<b-field label="Name">
+							<b-input
+								:value="user.surname"
+								placeholder="surname"
 								required>
 							</b-input>
 						</b-field>
 						<b-field label="Email">
 							<b-input
 								type="email"
-								:value="email"
+								:value="user.email"
 								placeholder="Your email"
 								required
 								icon="email">
@@ -79,17 +106,16 @@ const userAdmin = {
 						</b-field>
 					</b-tab-item>
 					<b-tab-item label="Permissions" icon="account-network">
-						<b-field label="Admin">
-							<b-switch 
-							v-model="admin"
-							true-value="true"
-							false-value="false"
-							type="is-danger">
-							</b-switch>
+						<b-field label="Role" class="">
+							<b-select v-model="user.role">
+								<option v-for="o in roles" :value="o">
+								{{o}}
+								</option>
+							</b-select>
 						</b-field>
 						<b-field label="Active">
 							<b-switch 
-							v-model="active"
+							:value="user.active"
 							true-value="true"
 							false-value="false"
 							type="is-danger">
@@ -110,7 +136,7 @@ const userAdmin = {
 				<b-tab-item label="Dashboards" icon="speedometer">
 					<b-table bordered
 					narrowed
-					:data="graphs"
+					:data="user.graphs"
 					:columns="tabColumns"
 					class="column"
 					>
@@ -118,14 +144,7 @@ const userAdmin = {
 					</b-tab-item>
 				</b-tabs>
 				</section>
-				<footer class="modal-card-foot">
-				<p class="control">
-					<button class="button is-dark is-medium" @click.prevent="vue.tstW('Save not implemented')">
-					<b-icon icon="content-save"></b-icon></button></button></p>
-				<p class="control">
-					<button class="button is-danger is-medium" @click.prevent="$parent.close()">
-					<b-icon icon="cancel"></b-icon></button></button></p>
-				</footer>
+				<footer class="modal-card-foot"></footer>
 			</div>
 			</form>
 			</section>

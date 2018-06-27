@@ -3,15 +3,15 @@
     <title>IOT PlatPus</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="./img/logo.ico"/>
-    <link rel="stylesheet" href="./css/app.css"/>
     <link rel="stylesheet" href="./css/materialdesignicons.min.css"/>    
     <link rel="stylesheet" href="./css/buefy.min.css">
+    <link rel="stylesheet" href="./css/app.css"/>
     <script src="./js/main.js"></script>
     <script src="./js/buefy.js"></script>
 </head>
     <body class="has-navbar-fixed-top">
         <div id="app" class="container">
-            <router-view></router-view>
+            <router-view :user="user"></router-view>
         </div>
         <!--<footer class="footer is-fixed-bottom">Copyright &copy; PlatPus 2018</footer>-->
     </body>

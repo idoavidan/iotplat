@@ -1,11 +1,27 @@
-//global 
-body {
-    margin : 0px;
-    background: linear-gradient(to bottom, #3333cc 0%, #9999ff 100%);
-    color : white;
-}
+/* body { */
+    /* margin : 0px; */
+    /* background: linear-gradient(to bottom, #3333cc 0%, #9999ff 100%); */
+    /* color : white; */
+/* } */
 path {
     fill: white;
+}
+.level {
+	margin-bottom:0 !important;
+	margin-top:0 !important;
+}
+.table-wrapper{
+	margin-bottom:0 !important;
+	margin-top:0 !important;
+}
+.tab-content{
+	padding-top: 0 !important;
+}
+.dropdown-content{
+	padding:0 !important;
+}
+th{
+	text-transform:capitalize;
 }
 /*
 .danger {

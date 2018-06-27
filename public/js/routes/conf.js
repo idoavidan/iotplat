@@ -5,5 +5,5 @@ var conf = {
     }, mounted () {
 	    c('mounted conf')
 	    vue.$data.isLoader=false;
-    }, template : `<div>Configuration<div>`
+    }, template : `<div><router-view></router-view><div>`
 };

@@ -10,5 +10,7 @@ module.exports.findOne = function(instance,query, exclude, callback){
 module.exports.update = function(instance,query, exclude, callback){
     instance.findOne(query,exclude,(err,user) => callback( err,user))
 }
-
+module.exports.remove = function(instance,query, callback){
+    instance.remove(query,(data,err) =>callback(data,err));
+}
 //  module.exports = 

@@ -65,17 +65,23 @@ function  vueFunc(){
 	    main
 	]
     });
+    router.beforeEach((to, from, next) => {
+	next();
+    })
     vue  = new Vue({
 	router,
 	components:[],
 	validations: {}
 	, el: '#app'
-	, data : {
-	    path :"query",
-	    selectInterval : [60,300,1800,3600,7200,14400,28800,86400,604800,2629746,31556952],
-	    selectChart : ['line','bar','pie','doughnut','map'],
-	    isLoader : false,
-	    isUserModal: false
+	, data : function() {
+	    return {
+		user: this.getUser(),
+		path :"query",
+		selectInterval : [60,300,1800,3600,7200,14400,28800,86400,604800,2629746,31556952],
+		selectChart : ['line','bar','pie','doughnut','map'],
+		isLoader : false,
+		isUserModal: false
+	    }
 	}, created : function (){
 	    Vue.use(Buefy.default);    
 	    var socket = io();
@@ -84,12 +90,16 @@ function  vueFunc(){
 		    console.log(data);
 		});
 	    });
-	}, mounted : function (){router.replace('/')
+	}, mounted : function (){
+	    router.replace('/');
 	}, updated : function (){
 	}, methods : {
-	    logout :function(){
+	    getUser:function() {
+		var u = this.gs('user');	
+		return u!==null && u ? JSON.parse(u) : {"username": "","password":"","token":""};
+	    }, logout :function(){
 		localStorage.removeItem('user');
-		vue.nav('/');
+		window.location.replace('/');
 	    }, tstS (msg){
 		this.$toast.open({
                     message: msg,
@@ -136,7 +146,7 @@ function  vueFunc(){
 		    callback('timeout',null);
 		};
 		var user = vue.isJson(vue.gs('user'),{'user':{'token':null}});
-		data.access_token =  user && user.token!==undefined ? user.token : null;
+		data.access_token =  vue.$data.user && vue.$data.user.token!==undefined ? vue.$data.user.token : null;
 		xhr.send(JSON.stringify(data)); 
 	    }, isJson : function (data,alt){
 		try {
@@ -151,7 +161,7 @@ function  vueFunc(){
 		    localStorage.setItem(data[0],data[1]);
 		    return true;
 		} catch(e){
-		    vue.showModAlert('Please allow cookies');
+		    vue.tstW('Please allow cookies');
 		    return false;
 		};
 	    }, gs : function (data){

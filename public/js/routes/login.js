@@ -1,31 +1,40 @@
 var login  = { 
 	path: '/', 
 	name:login,
+	props: true,
 	component: {
 		data : function() {
 			return {
-				username: this.getUser().username,
-				password: this.getUser().username,
-				token: this.getUser().token,
+				username:'',
+				password: '',
+				keep:'yes',
 				err: ''
 			}
-		}, created : function (){
+		}, props:['user']
+		, created : function (){
 			c('created login');
-			if (this.$data.token){vue.nav('/main')}
+			if (this.$props.user.token){
+				vue.getData({"path":"reconnect"}, function(err,res){
+					if (res){
+						vue.nav('/main');
+					};
+				});
+			};
 		}, mounted : function (){ 
 			c('mounted login');
 		}, updated : function (){
 		}, methods : {
-			getUser:function() {
-				var u = vue.gs('user');
-				return u!==null && u ? JSON.parse(u) : {"username": "","password":"","token":""};
-			},
 			login : function () {
 				d = this.$data;
 				if (d.username && d.password){
 					vue.getData({"path":"login","username": this.$data.username,"password":this.$data.password}, function(err,res){
 					if(res.user){
-						vue.ls(['user',JSON.stringify(res.user)]);
+						if (d.keep ==='yes'){
+							vue.ls(['user',JSON.stringify(res.user)]);
+						}else{
+							localStorage.removeItem('user');
+						}
+						vue.$data.user=res.user;
 						vue.nav('/main');
 					} else {
 						vue.tstW('Wrong details')
@@ -38,24 +47,26 @@ var login  = {
 			}
 		}, template:
 			`<div >
-			
-			<section class="section">      
-				<form v-if="!token" id="formLogin" class="container column is-4 is-offset-4">
-				    <b-field label="username">
-            <b-input v-model="username" icon="account"></b-input>
-        </b-field>
-		<b-field label="password" >
-            <b-input type="password" icon="lock-question"
-                v-model="password"
-                password-reveal>
-            </b-input>
-        </b-field>
-		<div style="text-align: center" > 
-			<button class="button is-dark is-medium " @click.prevent="login">Login</button>
-		</div>
-		<div style="text-align: center"><img src="./img/logo.png"></img></div>
-		</section>
-			
+				<form v-if="!user.token" id="formLogin" class="">
+				<section class="columns">
+				<div class="container is-offset-4 column is-4">
+				    <b-field label="username" position="is-center">
+						<b-input v-model="username" icon="account"></b-input>
+					</b-field>
+					<b-field label="password" position="is-center">
+						<b-input type="password" icon="lock-question" v-model="password" password-reveal></b-input>
+					</b-field>
+					<b-field label="Keep Logged In" position="is-center">							
+						<b-switch v-model="keep" type="is-danger" true-value="yes" false-value="no"></b-switch>
+						<p class="control"><button class="button is-dark is-medium " @click.prevent="login">Login</button></p>
+					</b-field>
+					<p class="image is-offset-4 column is-4">
+					<img src="./img/logo.png" ></img>
+					</p>
+				</div>
+	
+				</section>
+				</form>
 	</div>` 
 	}
 };

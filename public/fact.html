@@ -1,0 +1,342 @@
+<html>
+<head>
+    <title>IOT PlatPus</title>
+	<meta http-equiv="refresh" content="30" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="./img/logo.ico"/>
+    <link rel="stylesheet" href="./css/materialdesignicons.min.css"/>    
+    <link rel="stylesheet" href="./css/buefy.min.css">
+    <link rel="stylesheet" href="./css/app.css"/>
+    <script src="./js/buefy.js"></script>
+	<style>
+		background: linear-gradient(to bottom, #ccffff 0%, #ffffcc 100%) !important;
+	</style>
+</head>
+    <body class="has-navbar-fixed-top">
+        <div id="app" class="container">
+            <div class="tile is-ancestor">
+		<div class="tile is-4 is-vertical">
+			<div v-if="i%3===0" class="tile is-border" v-for="(o,i) in selectDash">
+				<canvas v-bind:id="o.name"></canvas>
+			</div>
+		</div>
+		<div class="tile is-4 is-vertical">
+			<div v-if="i%3===1" class="tile is-border" v-for="(o,i) in selectDash">
+				<canvas v-bind:id="o.name"></canvas>
+			</div>
+		</div>
+		<div class="tile is-4 is-vertical">
+			<div v-if="i%3===2" class="tile is-border" v-for="(o,i) in selectDash">
+				<canvas v-bind:id="o.name"></canvas>
+			</div>
+		</div>
+	</div>
+        </div>
+        <!--<footer class="footer is-fixed-bottom">Copyright &copy; PlatPus 2018</footer>-->
+    </body>
+    <script>var c = console.log.bind(console);
+var vue;
+//var myWorker = new Worker('./js/app2.js');
+function addScript(data,callback) {
+    var s = document.createElement('script');
+    if(localStorage.getItem(data.name)){
+	s.setAttribute('src', localStorage.getItem(data.name));
+    } else{
+	getFile({"path":data.path,"type":"application/javascript"}, function(res) {
+	    s.setAttribute('src', res);
+	    localStorage.setItem(data.name,res);
+	});
+    };
+    document.body.appendChild(s);
+    s.onload = function (){
+	callback();
+    };
+};
+function getFile(data,callback){
+    var xhr = new XMLHttpRequest(),
+	blob,
+	fileReader = new FileReader();
+    xhr.open("GET", data.path, true);
+    xhr.timeout=10000;
+    //Send the proper header information along with the request
+    // xhr.responseType = "application/javascript";
+    xhr.onload = function(e) {//Call a function when the state changes.
+	if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200  && xhr.response.lenght!==0) {
+	    blob = new Blob([xhr.response],{type:data.type});
+	    fileReader.onload = function(evt){
+		callback(evt.target.result);
+	    };
+	    fileReader.readAsDataURL(blob);
+	} else if (xhr.status !== 200){
+	    vue.tstW('error '+xhr.status+' , please check console');
+	    c(xhr);
+	} else {
+	    vue.tstW('error, please check console');
+	    c(xhr);
+	};
+    };
+    xhr.ontimeout = function (e){
+	vue.tstW('Timeout, please check connection');
+	callback('timeout',null);
+    };
+    xhr.send(JSON.stringify(data)); 
+};
+
+function start(){
+    addScript({"path":"./js/vue.min.js","name":"vue.min.js"},function(){
+	 addScript({"path":"./js/vue-router.js","name":"vue-router.js"},function(){
+	    addScript({"path":"/socket.io/socket.io.js","name":"socket.io.js"},function(){
+		vueFunc()
+	    });
+	});
+    });
+};
+start();
+var mainChart;
+function  vueFunc(){
+    vue  = new Vue({
+	components:[],
+	validations: {}
+	, el: '#app'
+	, data : {	
+	    path :"query",
+	    selectInterval : [60,300,1800,3600,7200,14400,28800,86400,604800,2629746,31556952],
+	    selectChart : ['line','bar','pie','doughnut','map'],
+		selectDash :[
+		{"name":"factpi0-10am2302H","group_name":"fact","device_id":"pi0-10","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-10am2302T","group_name":"fact","device_id":"pi0-10","sensor_id":"am2302T","interval":1800,"chart":"bar","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-10am2302TPIR","group_name":"fact","device_id":"pi0-10","sensor_id":"pir","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-10am2302T","group_name":"fact","device_id":"pi0-10","sensor_id":"am2302T","interval":1800,"chart":"bar","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-11am2302H","group_name":"fact","device_id":"pi0-11","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-11am2302T","group_name":"fact","device_id":"pi0-11","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-11am2302TPIE","group_name":"fact","device_id":"pi0-11","sensor_id":"am2302T","interval":1800,"chart":"pie","color":"#00a600","min":"20.8","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-12am2302H","group_name":"fact","device_id":"pi0-12","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-12am2302T","group_name":"fact","device_id":"pi0-12","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-13am2302H","group_name":"fact","device_id":"pi0-13","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-13am2302T","group_name":"fact","device_id":"pi0-13","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-14am2302H","group_name":"fact","device_id":"pi0-14","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-14am2302T","group_name":"fact","device_id":"pi0-14","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-15am2302H","group_name":"fact","device_id":"pi0-15","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-15am2302T","group_name":"fact","device_id":"pi0-15","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-16am2302H","group_name":"fact","device_id":"pi0-16","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-16am2302T","group_name":"fact","device_id":"pi0-16","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-17am2302H","group_name":"fact","device_id":"pi0-17","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-17am2302T","group_name":"fact","device_id":"pi0-17","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-18am2302H","group_name":"fact","device_id":"pi0-18","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-18am2302T","group_name":"fact","device_id":"pi0-18","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-19am2302H","group_name":"fact","device_id":"pi0-19","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-19am2302T","group_name":"fact","device_id":"pi0-19","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"}
+		], isLoader : false,
+	    isUserModal: false,
+		interval : '',
+		chart : '',
+		dashConfig : '',
+		charts:{}
+	}, created : function (){
+	    Vue.use(Buefy.default);    
+		c('created dash');
+		var t = this;
+		addScript({"path":"./js/moment.min.js","name":"moment.min.js"},function(){
+			addScript({"path":"./js/Chart.min.js","name":"Chart.min.js"},function(){	
+				t.loopDash();
+			});
+			// t.timeDash();
+		});
+	}, mounted : function (){
+	}, updated : function (){
+	}, methods : {
+	    logout :function(){
+		localStorage.removeItem('user');
+		window.location.replace('/');
+	    }, tstS (msg){
+		this.$toast.open({
+                    message: msg,
+                    type: 'is-success'
+                })
+	    }, tstW (msg){
+		this.$toast.open({
+                    message: msg,
+                    type: 'is-danger'
+                })
+	    }, allowDrop : function (ev) {
+		ev.preventDefault();
+	    }, drag : function (ev) {
+		ev.dataTransfer.setData("text", ev.target.id);
+	    }, drop : function (ev) {
+		ev.preventDefault();
+		var d = ev.dataTransfer.getData("text");
+		ev.target.appendChild(vue.el(d));
+	    }, getData : async function (data,callback){
+		var xhr = new XMLHttpRequest();
+		xhr.open("POST", data.path, true);
+		xhr.timeout=10000;
+		//Send the proper header information along with the request
+		xhr.setRequestHeader("Content-type", "application/json");
+		xhr.onload = function(e) {//Call a function when the state changes.
+		    if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200  && xhr.response.lenght!==0) {
+			callback(null,JSON.parse(xhr.response));
+		    } else if (xhr.status === 401){
+			vue.logout();
+			c(xhr,null);
+			callback(xhr,null);
+		    } else if (xhr.status !== 200){
+			vue.tstW('error, please check console');
+			c(xhr,null);
+			callback(xhr,null);
+		    } else {
+			vue.tstW('error, please check console');
+			c(xhr,null)
+			callback(xhr,null);
+		    };
+		};  
+		xhr.ontimeout = function (e){
+		    vue.tstW('Timeout, please check connection');
+		    callback('timeout',null);
+		};
+		var user = vue.isJson(vue.gs('user'),{'user':{'token':null}});
+		data.access_token =  user && user.token!==undefined ? user.token : null;
+		xhr.send(JSON.stringify(data)); 
+	    }, isJson : function (data,alt){
+		try {
+		    return JSON.parse(data);
+		} catch(e){
+		    return alt;
+		}
+	    }, el : function (data){
+		return document.getElementById(data);
+	    }, ls : function (data){
+		try {
+		    localStorage.setItem(data[0],data[1]);
+		    return true;
+		} catch(e){
+		    vue.tstW('Please allow cookies');
+		    return false;
+		};
+	    }, gs : function (data){
+		return localStorage.getItem(data);
+	    }, nav : function (path){
+	    },timeDash : function(){
+			t=this;
+			t.loopDash();
+			clearTimeout(tttt)
+			tttt=setTimeout(t.timeDash, 300000);
+		}, loopDash : function(){
+			vue.$data.isLoader=true;
+			var t = this;
+			c(vue.$data.selectDash	)
+			var d = vue.$data.selectDash;
+			if (d.length===0){
+				vue.$data.isLoader=false;
+				vue.tstW('No dashborads defined')
+			} else{
+				vue.$data.selectDash.map(o=>{
+					if(o.sensor_id){
+						var dt= Date.now();
+						vue.getData({"path":"query/feedsByIndex","parent":"device_id","parentVal":o.device_id,"index":"sensor_id","value":o.sensor_id,
+						"from":dt-o.interval*1000,"to":dt}
+						, function(err,res){
+							vue.$data.isLoader=false;
+							if(res && res.length>0){
+								t.$data.dashConfig=o;
+								t.showChart(res);
+							} else if (res){
+								c('No data found'+o.name);
+							} else {
+								c(err);
+								vue.tstW('No data found')
+							};
+						});
+					};
+				});
+			};
+		}, getDash : function () {
+		   return vue.gs('dash') ? JSON.parse(vue.gs('dash')) : [];
+		}, showChart : function(msg){
+			var options = {
+				responsive: true,
+				legend: {
+					labels: {
+						fontColor: "black",
+						fontSize: 16
+					}
+				}, scales: {
+					yAxes: [{
+						ticks: {
+							beginAtZero: true
+						}
+					}],
+					xAxes: [{
+						ticks: {
+							fontColor: "black",
+							fontSize: 16,
+							beginAtZero: true
+						}
+					}]
+				}
+			}
+			vue.$data.isLoader=true;
+			var t = this;
+			var ddd = t.$data.dashConfig;
+			c(ddd)
+			var labels=[];
+			var data=[];
+			var dataColor=[];
+			var type=ddd.chart ? ddd.chart : t.$data.selectChart[0];
+			if (['pie','doughnut','map'].indexOf(type) ===-1){
+				options.scales.xAxes[0].type='time';
+				options.scales.xAxes[0].time={'displayFormats': {'minute': 'hh:mm'}};
+				msg.map(o => {
+					d = new Date(o.timeS); // The 0
+					labels.push(moment(d))
+					data.push(o.data);
+						if(ddd.min !=="" && o.data<ddd.min){
+							dataColor.push(ddd.minColor);
+						} else if(ddd.max !=="" && o.data>ddd.max){
+							dataColor.push(ddd.maxColor);
+						} else{
+							dataColor.push(ddd.color||'black');
+						}
+					})
+			} else{
+				if(ddd.min !==""){
+					dataColor.push(ddd.minColor)
+					var m = msg.filter(({data}) => data < ddd.min).length;
+					data.push(m);
+					labels.push('min-'+m||0);
+				}
+				if(ddd.max !==""){
+					dataColor.push(ddd.maxColor)
+					var m = msg.filter(({data}) => data > ddd.max).length;
+					data.push(m);
+					labels.push('max-'+m||0)
+				}
+				var m = msg.length - (data[0]||0)-(data[1]||0);
+				dataColor.push(ddd.color);
+				data.push(m);
+				labels.push('ok-'+m||0);
+				labels.push('total-'+msg.length);
+			};
+			c(options)
+			t.$data.charts[ddd.name]= new Chart(vue.el(ddd.name).getContext('2d'), {
+				type: type,
+				data: {
+					labels: labels,
+					datasets: [{
+						type: type,
+						fill:false,
+						label: ddd.group_name+'-'+ddd.device_id+'-'+ddd.sensor_id,
+						data: data,
+						pointBackgroundColor : dataColor,
+						backgroundColor : dataColor,
+						fillColors : dataColor,
+						borderWidth: 1
+					}]
+				}, options: options
+			});
+		vue.$data.isLoader=false;
+		}
+	}
+    });
+};
+</script>
+</html>

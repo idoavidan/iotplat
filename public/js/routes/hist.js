@@ -16,7 +16,7 @@ var hist = {
 				sortable : true,
 				centered : true
 			}],
-			selectGroups : '',
+			selectDevices : '',
 			device : '',
 			deviceColumns: [{
 				field: 'device_id',
@@ -51,8 +51,8 @@ var hist = {
     }, mounted () {
 		this.$nextTick(function () {
 			c('mounted confGroups');			
+			this.getGroups();
 		});  
-		this.getGroups();
     }, methods : {
 		getGroups : function(){
 			t = this;
@@ -60,7 +60,11 @@ var hist = {
 			vue.getData({"path":"query/groups"}, function(err,res){
 				if(res){
 					vue.ls(['groups',JSON.stringify(res)]);
-					t.$data.selectGroups = res;
+					var x = []
+					x= res.map(o=>x.concat(o.group_devices))
+					c(x)
+					t.$data.selectDevices = x;
+					c(t.$data.selectDevices)
 				} else {
 					c(err);
 				}
@@ -72,9 +76,10 @@ var hist = {
 		<b-tabs type="is-boxed" v-model="activeTab" @change="">
 			<b-tab-item label="Devices" icon="cellphone-link">
 			<b-table
-				:data="group.group_devices"
+				:data="selectDevices"
 				:columns="deviceColumns"
-				focusable class="column"
+				focusable 
+				class="column"
 				:selected.sync="device">
 			</b-table>
 			</b-tab-item>
