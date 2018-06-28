@@ -1,7 +1,7 @@
 <html>
 <head>
     <title>IOT PlatPus</title>
-	<meta http-equiv="refresh" content="30" />
+	<!-- <meta http-equiv="refresh" content="30" /> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="./img/logo.ico"/>
     <link rel="stylesheet" href="./css/materialdesignicons.min.css"/>    
@@ -12,27 +12,32 @@
 		background: linear-gradient(to bottom, #ccffff 0%, #ffffcc 100%) !important;
 	</style>
 </head>
-    <body class="has-navbar-fixed-top">
-        <div id="app" class="container">
-            <div class="tile is-ancestor">
-		<div class="tile is-4 is-vertical">
-			<div v-if="i%3===0" class="tile is-border" v-for="(o,i) in selectDash">
-				<canvas v-bind:id="o.name"></canvas>
-			</div>
-		</div>
-		<div class="tile is-4 is-vertical">
-			<div v-if="i%3===1" class="tile is-border" v-for="(o,i) in selectDash">
-				<canvas v-bind:id="o.name"></canvas>
-			</div>
-		</div>
-		<div class="tile is-4 is-vertical">
-			<div v-if="i%3===2" class="tile is-border" v-for="(o,i) in selectDash">
-				<canvas v-bind:id="o.name"></canvas>
-			</div>
-		</div>
-	</div>
+    <body>
+        <div id="app" class="container" v-cloak>
+			 <b-collapse class="card" v-for="o in devices" :open="false">
+			 <div slot="trigger" slot-scope="props" class="card-header">
+                <p class="card-header-title">
+                    {{o.device_name}}
+					<span v-for="s in o.device_sensors"><b-tag> {{s.sensor_name}}:{{s.value|| '____'}} </b-tag></span>
+                </p>
+				<p class="card-header-title">
+				
+                </p>
+                <a class="card-header-icon">
+                    <b-icon
+                        :icon="props.open ? 'menu-down' : 'menu-up'">
+                    </b-icon>
+                </a>
+            </div>
+            <div class="card-content columns">
+                <div class="column is-6" v-for="rec in selectDash.filter(rec=>rec.device_id ===o.device_id)" >
+						<!-- <canvas style="height:160px" v-bind:id="rec.device_id+rec.sensor_id"></canvas> -->
+						<canvas style="height:160px" v-bind:id="rec.device_id+rec.sensor_id"></canvas>
+                </div>
+            </div>
+			 </b-collapse>
         </div>
-        <!--<footer class="footer is-fixed-bottom">Copyright &copy; PlatPus 2018</footer>-->
+        <footer class="footer is-fixed-bottom is-center">Copyright &copy; PlatPus 2018</footer>
     </body>
     <script>var c = console.log.bind(console);
 var vue;
@@ -76,8 +81,8 @@ function getFile(data,callback){
 	};
     };
     xhr.ontimeout = function (e){
-	vue.tstW('Timeout, please check connection');
-	callback('timeout',null);
+		vue.tstW('Timeout, please check connection');
+		callback('timeout',null);
     };
     xhr.send(JSON.stringify(data)); 
 };
@@ -86,7 +91,20 @@ function start(){
     addScript({"path":"./js/vue.min.js","name":"vue.min.js"},function(){
 	 addScript({"path":"./js/vue-router.js","name":"vue-router.js"},function(){
 	    addScript({"path":"/socket.io/socket.io.js","name":"socket.io.js"},function(){
-		vueFunc()
+			vueFunc()
+			var socket = io();
+			socket.on('connect', function(){
+				socket.on('feed', function(data){
+				vue.addData(vue.$data.charts[data.device_id+data.sensor_id],data.timeS,data.data);
+				vue.removeData(vue.$data.charts[data.device_id+data.sensor_id])
+				x = vue.$data.devices.find(o=>o.device_id===data.device_id);
+				c
+				if (x){
+					x.device_sensors.find(o=>o.sensor_id===data.sensor_id).value=data.data;
+					c(data.data)
+				}
+			});
+	    });
 	    });
 	});
     });
@@ -102,30 +120,39 @@ function  vueFunc(){
 	    path :"query",
 	    selectInterval : [60,300,1800,3600,7200,14400,28800,86400,604800,2629746,31556952],
 	    selectChart : ['line','bar','pie','doughnut','map'],
+		devices:[
+			{'device_id':'pi0-11','device_name':'FS','device_sensors':[{'sensor_id':'am2302H','sensor_name':'Hum','value':''},{'sensor_id':'am2302T','sensor_name':'Temp','value':''}]},
+			{'device_id':'pi0-14','device_name':'LM','device_sensors':[{'sensor_id':'am2302H','sensor_name':'Hum','value':''},{'sensor_id':'am2302T','sensor_name':'Temp','value':''}]},
+			{'device_id':'pi0-14','device_name':'LM','device_sensors':[{'sensor_id':'am2302H','sensor_name':'Hum','value':''},{'sensor_id':'am2302T','sensor_name':'Temp','value':''}]},
+			{'device_id':'pi0-13','device_name':'SERVER','device_sensors':[{'sensor_id':'am2302H','sensor_name':'Hum','value':''},{'sensor_id':'am2302T','sensor_name':'Temp','value':''}]},
+			{'device_id':'pi0-17','device_name':'CONSUMABLES','device_sensors':[{'sensor_id':'am2302H','sensor_name':'Hum','value':''},{'sensor_id':'am2302T','sensor_name':'Temp','value':''}]},
+			{'device_id':'pi0-18','device_name':'PAPERSTORE','device_sensors':[{'sensor_id':'am2302H','sensor_name':'Hum','value':''},{'sensor_id':'am2302T','sensor_name':'Temp','value':''}]},
+			{'device_id':'pi0-19','device_name':'QC','device_sensors':[{'sensor_id':'am2302H','sensor_name':'Hum','value':''},{'sensor_id':'am2302T','sensor_name':'Temp','value':''}]},
+			{'device_id':'pi0-10','device_name':'pi0-10','device_sensors':[{'sensor_id':'am2302H','sensor_name':'Hum','value':''},{'sensor_id':'am2302T','sensor_name':'Temp','value':''}]},
+			{'device_id':'pi0-15','device_name':'pi0-15','device_sensors':[{'sensor_id':'am2302H','sensor_name':'Hum','value':''},{'sensor_id':'am2302T','sensor_name':'Temp','value':''}]},
+			{'device_id':'pi0-16','device_name':'pi0-16','device_sensors':[{'sensor_id':'am2302H','sensor_name':'Hum','value':''},{'sensor_id':'am2302T','sensor_name':'Temp','value':''}]}
+		],
 		selectDash :[
-		{"name":"factpi0-10am2302H","group_name":"fact","device_id":"pi0-10","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-10am2302T","group_name":"fact","device_id":"pi0-10","sensor_id":"am2302T","interval":1800,"chart":"bar","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-10am2302H","group_name":"fact","device_id":"pi0-10","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"40","minColor":"#0000FF","max":"60","maxColor":"#ff0000"},
+		{"name":"factpi0-10am2302T","group_name":"fact","device_id":"pi0-10","sensor_id":"am2302T","interval":1800,"chart":"bar","color":"#00a600","min":"20","minColor":"#0000FF","max":"26","maxColor":"#ff0000"},
 		{"name":"factpi0-10am2302TPIR","group_name":"fact","device_id":"pi0-10","sensor_id":"pir","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-10am2302T","group_name":"fact","device_id":"pi0-10","sensor_id":"am2302T","interval":1800,"chart":"bar","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-11am2302H","group_name":"fact","device_id":"pi0-11","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-11am2302T","group_name":"fact","device_id":"pi0-11","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-11am2302TPIE","group_name":"fact","device_id":"pi0-11","sensor_id":"am2302T","interval":1800,"chart":"pie","color":"#00a600","min":"20.8","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-12am2302H","group_name":"fact","device_id":"pi0-12","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-12am2302T","group_name":"fact","device_id":"pi0-12","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-13am2302H","group_name":"fact","device_id":"pi0-13","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-13am2302T","group_name":"fact","device_id":"pi0-13","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-14am2302H","group_name":"fact","device_id":"pi0-14","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-14am2302T","group_name":"fact","device_id":"pi0-14","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-15am2302H","group_name":"fact","device_id":"pi0-15","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-10am2302T","group_name":"fact","device_id":"pi0-10","sensor_id":"am2302T","interval":1800,"chart":"bar","color":"#00a600","min":"20","minColor":"#0000FF","max":"26","maxColor":"#ff0000"},
+		{"name":"FS-Humidity","group_name":"fact","device_id":"pi0-11","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"40","minColor":"#0000FF","max":"60","maxColor":"#ff0000"},
+		{"name":"FS-Temp","group_name":"fact","device_id":"pi0-11","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"SERVER-H","group_name":"fact","device_id":"pi0-13","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"40","minColor":"#0000FF","max":"60","maxColor":"#ff0000"},
+		{"name":"SERVER-T","group_name":"fact","device_id":"pi0-13","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"LM-H","group_name":"fact","device_id":"pi0-14","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"40","minColor":"#0000FF","max":"60","maxColor":"#ff0000"},
+		{"name":"LM-T","group_name":"fact","device_id":"pi0-14","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-15am2302H","group_name":"fact","device_id":"pi0-15","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"40","minColor":"#0000FF","max":"60","maxColor":"#ff0000"},
 		{"name":"factpi0-15am2302T","group_name":"fact","device_id":"pi0-15","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-16am2302H","group_name":"fact","device_id":"pi0-16","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"factpi0-16am2302H","group_name":"fact","device_id":"pi0-16","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"40","minColor":"#0000FF","max":"60","maxColor":"#ff0000"},
 		{"name":"factpi0-16am2302T","group_name":"fact","device_id":"pi0-16","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-17am2302H","group_name":"fact","device_id":"pi0-17","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-17am2302T","group_name":"fact","device_id":"pi0-17","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-18am2302H","group_name":"fact","device_id":"pi0-18","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-18am2302T","group_name":"fact","device_id":"pi0-18","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-19am2302H","group_name":"fact","device_id":"pi0-19","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
-		{"name":"factpi0-19am2302T","group_name":"fact","device_id":"pi0-19","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"}
+		{"name":"CONSUMABLES-H","group_name":"fact","device_id":"pi0-17","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"40","minColor":"#0000FF","max":"60","maxColor":"#ff0000"},
+		{"name":"CONSUMABLES-T","group_name":"fact","device_id":"pi0-17","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"PAPERSTORE-H","group_name":"fact","device_id":"pi0-18","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"40","minColor":"#0000FF","max":"60","maxColor":"#ff0000"},
+		{"name":"PAPERSTORE-T","group_name":"fact","device_id":"pi0-18","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"},
+		{"name":"QC-H","group_name":"fact","device_id":"pi0-19","sensor_id":"am2302H","interval":1800,"chart":"line","color":"#000000","min":"40","minColor":"#0000FF","max":"60","maxColor":"#ff0000"},
+		{"name":"QC-T","group_name":"fact","device_id":"pi0-19","sensor_id":"am2302T","interval":1800,"chart":"line","color":"#00a600","min":"","minColor":"#0000FF","max":"","maxColor":"#ff0000"}
 		], isLoader : false,
 	    isUserModal: false,
 		interval : '',
@@ -161,42 +188,42 @@ function  vueFunc(){
 	    }, allowDrop : function (ev) {
 		ev.preventDefault();
 	    }, drag : function (ev) {
-		ev.dataTransfer.setData("text", ev.target.id);
+			ev.dataTransfer.setData("text", ev.target.id);
 	    }, drop : function (ev) {
-		ev.preventDefault();
-		var d = ev.dataTransfer.getData("text");
-		ev.target.appendChild(vue.el(d));
+			ev.preventDefault();
+			var d = ev.dataTransfer.getData("text");
+			ev.target.appendChild(vue.el(d));
 	    }, getData : async function (data,callback){
-		var xhr = new XMLHttpRequest();
-		xhr.open("POST", data.path, true);
-		xhr.timeout=10000;
-		//Send the proper header information along with the request
-		xhr.setRequestHeader("Content-type", "application/json");
-		xhr.onload = function(e) {//Call a function when the state changes.
-		    if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200  && xhr.response.lenght!==0) {
-			callback(null,JSON.parse(xhr.response));
-		    } else if (xhr.status === 401){
-			vue.logout();
-			c(xhr,null);
-			callback(xhr,null);
-		    } else if (xhr.status !== 200){
-			vue.tstW('error, please check console');
-			c(xhr,null);
-			callback(xhr,null);
-		    } else {
-			vue.tstW('error, please check console');
-			c(xhr,null)
-			callback(xhr,null);
-		    };
-		};  
-		xhr.ontimeout = function (e){
-		    vue.tstW('Timeout, please check connection');
-		    callback('timeout',null);
-		};
-		var user = vue.isJson(vue.gs('user'),{'user':{'token':null}});
-		data.access_token =  user && user.token!==undefined ? user.token : null;
-		xhr.send(JSON.stringify(data)); 
-	    }, isJson : function (data,alt){
+			var xhr = new XMLHttpRequest();
+			xhr.open("POST", data.path, true);
+			xhr.timeout=10000;
+			//Send the proper header information along with the request
+			xhr.setRequestHeader("Content-type", "application/json");
+			xhr.onload = function(e) {//Call a function when the state changes.
+				if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200  && xhr.response.lenght!==0) {
+				callback(null,JSON.parse(xhr.response));
+				} else if (xhr.status === 401){
+				vue.logout();
+				c(xhr,null);
+				callback(xhr,null);
+				} else if (xhr.status !== 200){
+				vue.tstW('error, please check console');
+				c(xhr,null);
+				callback(xhr,null);
+				} else {
+				vue.tstW('error, please check console');
+				c(xhr,null)
+				callback(xhr,null);
+				};
+			};  
+			xhr.ontimeout = function (e){
+				vue.tstW('Timeout, please check connection');
+				callback('timeout',null);
+			};
+			var user = vue.isJson(vue.gs('user'),{'user':{'token':null}});
+			data.access_token =  user && user.token!==undefined ? user.token : null;
+			xhr.send(JSON.stringify(data)); 
+		}, isJson : function (data,alt){
 		try {
 		    return JSON.parse(data);
 		} catch(e){
@@ -223,7 +250,6 @@ function  vueFunc(){
 		}, loopDash : function(){
 			vue.$data.isLoader=true;
 			var t = this;
-			c(vue.$data.selectDash	)
 			var d = vue.$data.selectDash;
 			if (d.length===0){
 				vue.$data.isLoader=false;
@@ -251,7 +277,19 @@ function  vueFunc(){
 			};
 		}, getDash : function () {
 		   return vue.gs('dash') ? JSON.parse(vue.gs('dash')) : [];
-		}, showChart : function(msg){
+		}, addData : function (chart, label, data) {
+			chart.data.labels.push(label);
+			chart.data.datasets.forEach((dataset) => {
+				dataset.data.push(data);
+			});
+			chart.update();
+		}, removeData : function (chart) {
+			chart.data.labels.shift();
+			chart.data.datasets.forEach((dataset) => {
+				dataset.data.shift();
+			});
+			chart.update();
+		},	showChart : function(msg){
 			var options = {
 				responsive: true,
 				legend: {
@@ -277,11 +315,11 @@ function  vueFunc(){
 			vue.$data.isLoader=true;
 			var t = this;
 			var ddd = t.$data.dashConfig;
-			c(ddd)
 			var labels=[];
 			var data=[];
 			var dataColor=[];
 			var type=ddd.chart ? ddd.chart : t.$data.selectChart[0];
+			var label=ddd.name || (ddd.group_name+'-'+ddd.device_id+'-'+ddd.sensor_id);
 			if (['pie','doughnut','map'].indexOf(type) ===-1){
 				options.scales.xAxes[0].type='time';
 				options.scales.xAxes[0].time={'displayFormats': {'minute': 'hh:mm'}};
@@ -316,15 +354,14 @@ function  vueFunc(){
 				labels.push('ok-'+m||0);
 				labels.push('total-'+msg.length);
 			};
-			c(options)
-			t.$data.charts[ddd.name]= new Chart(vue.el(ddd.name).getContext('2d'), {
+			t.$data.charts[ddd.device_id+ddd.sensor_id]= new Chart(vue.el(ddd.device_id+ddd.sensor_id).getContext('2d'), {
 				type: type,
 				data: {
 					labels: labels,
 					datasets: [{
 						type: type,
 						fill:false,
-						label: ddd.group_name+'-'+ddd.device_id+'-'+ddd.sensor_id,
+						label: label,
 						data: data,
 						pointBackgroundColor : dataColor,
 						backgroundColor : dataColor,
