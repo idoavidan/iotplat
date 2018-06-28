@@ -4,7 +4,7 @@
 	<!-- <meta http-equiv="refresh" content="30" /> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="./img/logo.ico"/>
-    <link rel="stylesheet" href="./css/materialdesignicons.min.css"/>    
+    <link rel="stylesheet" href="./css/materialdesignicons.min.css"/> 
     <link rel="stylesheet" href="./css/buefy.min.css">
     <link rel="stylesheet" href="./css/app.css"/>
     <script src="./js/buefy.js"></script>
@@ -88,26 +88,26 @@ function getFile(data,callback){
 };
 
 function start(){
-    addScript({"path":"./js/vue.min.js","name":"vue.min.js"},function(){
-	 addScript({"path":"./js/vue-router.js","name":"vue-router.js"},function(){
-	    addScript({"path":"/socket.io/socket.io.js","name":"socket.io.js"},function(){
-			vueFunc()
-			var socket = io();
-			socket.on('connect', function(){
-				socket.on('feed', function(data){
-				vue.addData(vue.$data.charts[data.device_id+data.sensor_id],data.timeS,data.data);
-				vue.removeData(vue.$data.charts[data.device_id+data.sensor_id])
-				x = vue.$data.devices.find(o=>o.device_id===data.device_id);
-				c
-				if (x){
-					x.device_sensors.find(o=>o.sensor_id===data.sensor_id).value=data.data;
-					c(data.data)
-				}
+	addScript({"path":"./js/buefy.js","name":"buefy.js"},function(){
+		addScript({"path":"./js/vue.min.js","name":"vue.min.js"},function(){
+			addScript({"path":"./js/vue-router.js","name":"vue-router.js"},function(){
+				addScript({"path":"/socket.io/socket.io.js","name":"socket.io.js"},function(){
+					vueFunc();
+					var socket = io();
+					socket.on('connect', function(){
+						socket.on('feed', function(data){
+						vue.addData(vue.$data.charts[data.device_id+data.sensor_id],data.timeS,data.data);
+						vue.removeData(vue.$data.charts[data.device_id+data.sensor_id])
+						x = vue.$data.devices.find(o=>o.device_id===data.device_id);
+							if (x){
+								x.device_sensors.find(o=>o.sensor_id===data.sensor_id).value=data.data;
+							}
+						});
+				}	);
+				});
 			});
-	    });
-	    });
+		});
 	});
-    });
 };
 start();
 var mainChart;
@@ -122,7 +122,6 @@ function  vueFunc(){
 	    selectChart : ['line','bar','pie','doughnut','map'],
 		devices:[
 			{'device_id':'pi0-11','device_name':'FS','device_sensors':[{'sensor_id':'am2302H','sensor_name':'Hum','value':''},{'sensor_id':'am2302T','sensor_name':'Temp','value':''}]},
-			{'device_id':'pi0-14','device_name':'LM','device_sensors':[{'sensor_id':'am2302H','sensor_name':'Hum','value':''},{'sensor_id':'am2302T','sensor_name':'Temp','value':''}]},
 			{'device_id':'pi0-14','device_name':'LM','device_sensors':[{'sensor_id':'am2302H','sensor_name':'Hum','value':''},{'sensor_id':'am2302T','sensor_name':'Temp','value':''}]},
 			{'device_id':'pi0-13','device_name':'SERVER','device_sensors':[{'sensor_id':'am2302H','sensor_name':'Hum','value':''},{'sensor_id':'am2302T','sensor_name':'Temp','value':''}]},
 			{'device_id':'pi0-17','device_name':'CONSUMABLES','device_sensors':[{'sensor_id':'am2302H','sensor_name':'Hum','value':''},{'sensor_id':'am2302T','sensor_name':'Temp','value':''}]},
@@ -256,16 +255,23 @@ function  vueFunc(){
 				vue.tstW('No dashborads defined')
 			} else{
 				vue.$data.selectDash.map(o=>{
+				vue.$data.isLoader=true;
 					if(o.sensor_id){
 						var dt= Date.now();
 						vue.getData({"path":"query/feedsByIndex","parent":"device_id","parentVal":o.device_id,"index":"sensor_id","value":o.sensor_id,
 						"from":dt-o.interval*1000,"to":dt}
 						, function(err,res){
 							vue.$data.isLoader=false;
+							t.$data.dashConfig=o;
 							if(res && res.length>0){
-								t.$data.dashConfig=o;
+								x= vue.$data.devices.find(i=>i.device_id===o.device_id);
+								if (x){
+									x.device_sensors.find(i=>i.sensor_id===o.sensor_id).value=res.slice(-1)[0].data ;
+								}
 								t.showChart(res);
 							} else if (res){
+								t.showChart([{data:'','device_id':o.device_id,sensor_id:o.sensor_id,'timeS':dt-o.interval*1000},
+								{data:'','device_id':o.device_id,sensor_id:o.sensor_id,'timeS':dt}])
 								c('No data found'+o.name);
 							} else {
 								c(err);
