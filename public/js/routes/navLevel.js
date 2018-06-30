@@ -3,9 +3,9 @@ const navLevel = {
 		return {
 			rrrrrr:''
 		}
-	}, props: ['nav']
+	}, props: ['nav','prog']
 	, mounted(){
-		// c(this.$props)
+		c(this.$props)
 	}, methods : {
 		showBtn(btn){
 			return this.$props.nav.buttons.findIndex(o=>o.button===btn)!==-1
@@ -22,17 +22,22 @@ const navLevel = {
 					<button class="button is-link is-medium" @click="compEvent('left')" :disabled="disBtn('left')">
 					<b-icon icon="arrow-left"></b-icon> <p>Back</p></button>
 				</div>
-				<div class="level-item" v-if="showBtn('save')">
-					<button class="button is-dark is-medium" @click.prevent="compEvent('save')" :disabled="disBtn('save')">
-						<b-icon icon="content-save"></b-icon> <p>Save</p></button>
-					</div>
 				<div class="level-item" v-if="showBtn('del')">
 					<button class="button is-danger is-medium" hidden @click="compEvent('del')" :disabled="disBtn('del')">
 					<b-icon icon="delete"></b-icon></button>
 				</div>
 			</div>
-			{{nav.msg}}
+			<b-tooltip :label="nav.msg" position="is-bottom">
+			<progress class="progress is-link" :value="Math.round(100*prog.pos/prog.steps)" max="100">
+			
+			</progress>
+			</b-tooltip>
+			
 			<div class="level-right">
+				<div class="level-item" v-if="showBtn('save')">
+				<button class="button is-dark is-medium" @click.prevent="compEvent('save')" :disabled="disBtn('save')">
+					<b-icon icon="content-save"></b-icon> <p>Save</p></button>
+				</div>
 				<div class="level-item" v-if="showBtn('right')">
 					<button class="button is-link is-medium" @click="compEvent('right')" :disabled="disBtn('right')">
 					Next<p></p> <b-icon icon="arrow-right"></b-icon></button>    

@@ -3,9 +3,7 @@
     /* background: linear-gradient(to bottom, #3333cc 0%, #9999ff 100%); */
     /* color : white; */
 /* } */
-path {
-    fill: white;
-}
+[v-cloak] { display: none; }
 .level {
 	margin-bottom:0 !important;
 	margin-top:0 !important;
@@ -20,8 +18,15 @@ path {
 .dropdown-content{
 	padding:0 !important;
 }
+
+.columns,.column {
+	padding:0.5rem !important;
+}
 th{
 	text-transform:capitalize;
+}
+.tooltip{
+	width:100% !important;
 }
 /*
 .danger {

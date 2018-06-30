@@ -1,8 +1,14 @@
 var pages = [
-	{ path: 'dash',
+	{ path: 'home',
     name: 'Home',
-	component: dash ,
+	component: home ,
     icon : 'home',
+	role:''
+    },
+	{ path: 'dash',
+    name: 'My Dashboards',
+	component: dash ,
+    icon : 'speedometer',
 	role:''
     },
     { path: 'history',
@@ -49,7 +55,7 @@ var main = {
 		},props:['user'], created : function(){
 			c('created main')
 			addScript({"path":"./js/moment.min.js","name":"moment.min.js"},function(){
-				vue.nav('/main/dash')
+				vue.nav('/main/'+pages[0].path);
 			});
 		}, mounted () {
 			Vue.component('userModal', userModal);
@@ -96,8 +102,7 @@ var main = {
 				</div>
 			</div>
 			<div class="navbar-end">
-			{{user.username}}
-				<button class="nav-item button is-dark is-fullwidth" @click="isUserModal = true"><b-icon icon="account"></b-icon></button>
+				<button class="nav-item button is-dark is-fullwidth" @click="isUserModal = true">{{user.username}}</p><b-icon icon="account"></b-icon></button>
 				<button class="nav-item button is-dark is-fullwidth" @click="vue.logout"><b-icon icon="logout"></b-icon></button>
 			</div>
 		</div>

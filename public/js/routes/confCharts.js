@@ -77,13 +77,13 @@ var confCharts = {
 		{'field':'max',"type":"number"},
 		{'field':'maxColor',"type":"color","default":"#ff0000"}
 		],
-		navBtns :{
-			'dash':{'msg':'Select existing Dashboard','buttons':[{'button':'del','status':false},{'button':'right','status':true}]},
-			'device':{'msg':'Choose Group, Device and Sensor to monitor','buttons':[{'button':'left','status':true},{'button':'right','status':false}]},
-			'chart':{'msg':'Select Chart properties','buttons':[{'button':'left','status':true},{'button':'right','status':true}]},
-			'alert':{'msg':'Configure Alerts','buttons':[{'button':'left','status':true},{'button':'right','status':true}]},
-			'view':{'msg':'Save or go to previous steps','buttons':[{'button':'left','status':true},{'button':'save','status':true}]}
-		},
+		navBtns :[
+			{'name':'dash','msg':'Select existing Dashboard','buttons':[{'button':'del','status':false},{'button':'right','status':true}]},
+			{'name':'device','msg':'Choose Group, Device and Sensor to monitor','buttons':[{'button':'left','status':true},{'button':'right','status':false}]},
+			{'name':'chart','msg':'Select Chart properties','buttons':[{'button':'left','status':true},{'button':'right','status':true}]},
+			{'name':'alert','msg':'Configure Alerts','buttons':[{'button':'left','status':true},{'button':'right','status':true}]},
+			{'name':'view','msg':'Save or go to previous steps','buttons':[{'button':'left','status':true},{'button':'save','status':true}]}
+		],
 	    dashColumns: [{
 			field: 'name',
 			label: 'Dashboard',
@@ -120,7 +120,7 @@ var confCharts = {
 	    dashConfig : {},
 	    dashConfigHist : [],
 	    selectDash : [],
-	    selectGroups : this.getGroups(),
+	    selectGroups : '',
 	    isMounted:false
 	}
     }, computed: {
@@ -130,6 +130,7 @@ var confCharts = {
 		addScript({"path":"./js/Chart.min.js","name":"Chart.min.js"},function(){
 	});
     }, mounted () {
+		this.getGroups();
 		Vue.component('navlevel', navLevel);
 	var t=this;
 	t.$nextTick(function () {
@@ -146,10 +147,10 @@ var confCharts = {
 	required (){
 		var d = this.$data
 		var f=d.chartFields.filter(o => o.required === "true" )
-		if(d.group.group_name && d.devices.device_name && d.sensors.sensor_id){
-			t.navBtns.device.buttons.map(o=>o.status=true)
+		if(d.group && d.group.group_name && d.devices.device_name && d.sensors.sensor_id){
+			d.navBtns.find(o=>o.name==='device').buttons.map(o=>o.status=true)
 		} else{
-			t.navBtns.device.buttons.find(o=>o.button==='right').status=false;
+			d.navBtns.find(o=>o.name==='device').buttons.find(o=>o.button==='right').status=false;
 		}
 		var e=f.map(o=> 
 			d.dashConfig[o.field] !==undefined && ['',null,undefined].indexOf(d.dashConfig[o.field])===-1
@@ -165,17 +166,16 @@ var confCharts = {
 	}, getGroups (){
 		t = this;
 		if (!vue.gs('groups')){
-		vue.getData({"path":"query/groups"}, function(err,
-		){
+		vue.getData({"path":"query/groups"}, function(err,res){
 			if(res){
 				vue.ls(['groups',JSON.stringify(res)]);
-				t.selectGroups=res;
+				t.$data.selectGroups=res;
 			} else {
 				c(err);
 			}
 		});
 		} else{
-		return JSON.parse(vue.gs('groups'));
+			t.$data.selectGroups = vue.isJson(vue.gs('groups'),{});
 		};
 	}, getDash  () {
 		var n=[this.getDefault()];
@@ -360,19 +360,18 @@ var confCharts = {
 	},
 	watch : {
 		dashConfig(){
-			var t = this ;
-			if(t.dashConfig.name!==""){
-				t.navBtns.dash.buttons.map(o=>o.status=true)
+			var d = this.$data ;
+			if(d.dashConfig.name!==""){
+				d.navBtns.dash.buttons.map(o=>o.status=true)
 			} else{
-				t.navBtns.dash.buttons.find(o=>o.button==='del').status=false;
+				d.navBtns.dash.buttons.find(o=>o.button==='del').status=false;
 			}
-				t.group=t.selectGroups.find(o=>o.group_name===t.dashConfig.group_name)||'';
-				c(t.group)
-			if (t.group!==undefined && t.group.group_devices!==undefined){
-				t.devices=t.group.group_devices.find(o=>o.device_name===t.dashConfig.device_id)||'';
+			d.group = d.selectGroups ? d.selectGroups.find(o=>o.group_name===d.dashConfig.group_name):'';
+			if (d.group!==undefined && d.group.group_devices!==undefined){
+				d.devices=d.group.group_devices.find(o=>o.device_name===d.dashConfig.device_id)||'';
 			}
-			if (t.devices!=''){
-				t.sensors=t.devices.device_sensors.find(o=>o.sensor_id===t.dashConfig.sensor_id)||'';
+			if (d.devices!=''){
+				d.sensors=d.devices.device_sensors.find(o=>o.sensor_id===d.dashConfig.sensor_id)||'';
 			}
 		}, group(){
 			c('group')
@@ -392,7 +391,7 @@ var confCharts = {
 				<b-icon icon="speedometer"></b-icon>
 				<span> Dashboards <b-tag rounded> {{selectDash.length - 1}} </b-tag> </span>
 			</template>
-			<navlevel v-bind:nav="navBtns.dash" v-on:compEvent="compEvent($event)"></navlevel>
+			<navlevel v-bind:prog="{'steps':navBtns.length-1,'pos':'0'}"  v-bind:nav="navBtns[0]" v-on:compEvent="compEvent($event)"></navlevel>
 				<b-table bordered narrowed class="column is-4"
 				 :data="selectDash"
 				 :columns="dashColumns"
@@ -403,7 +402,7 @@ var confCharts = {
 				 ></b-table>
 		</b-tab-item>
 		<b-tab-item label="Devices" icon="group" :disabled="!required()" > 
-			<navlevel v-bind:nav="navBtns.device" v-on:compEvent="compEvent($event)"></navlevel>
+			<navlevel v-bind:prog="{'steps':navBtns.length-1,'pos':'1'}"  v-bind:nav="navBtns[1]" v-on:compEvent="compEvent($event)"></navlevel>
 			<section class="columns">
 			<b-table bordered narrowed class="column is-4"
 				 :data="selectGroups"
@@ -414,7 +413,7 @@ var confCharts = {
 				 :per-page="10"
 				 @select="reset('g')"
 				 ></b-table>
-			<b-table bordered narrowed class="column is-4"
+			<b-table bordered narrowed class="column is-4" v-if="group && group.group_devices"
 				 :data="group.group_devices"
 				 :columns="deviceColumns"
 				 focusable
@@ -435,7 +434,7 @@ var confCharts = {
 		</section>
 		</b-tab-item>
 		<b-tab-item label="Chart" icon="finance" :disabled="!required()">
-		<navlevel v-bind:nav="navBtns.chart" v-on:compEvent="compEvent($event)"></navlevel>
+		<navlevel v-bind:prog="{'steps':navBtns.length-1,'pos':'2'}"  v-bind:nav="navBtns[2]" v-on:compEvent="compEvent($event)"></navlevel>
 		<section class="columns">
 			<b-field grouped>
 			<b-field label="Chart" class="column is-4" type="is-warning">
@@ -482,10 +481,10 @@ var confCharts = {
 		</section>
 		</b-tab-item>
 		<b-tab-item label="Alerts" icon="alert"  :disabled="!required()">
-		<navlevel v-bind:nav="navBtns.alert" v-on:compEvent="compEvent($event)"></navlevel>
+		<navlevel v-bind:prog="{'steps':navBtns.length-1,'pos':'3'}"  v-bind:nav="navBtns[3]" v-on:compEvent="compEvent($event)"></navlevel>
 		</b-tab-item>
 		<b-tab-item label="View" icon="eye" :disabled="!required()">
-		<navlevel v-bind:nav="navBtns.view" v-on:compEvent="compEvent($event)"></navlevel>
+		<navlevel v-bind:prog="{'steps':navBtns.length-1,'pos':'4'}"  v-bind:nav="navBtns[4]" v-on:compEvent="compEvent($event)"></navlevel>
 		<canvas id="mainChart"></canvas>
 		</b-tab-item>
 	</b-tabs>	
