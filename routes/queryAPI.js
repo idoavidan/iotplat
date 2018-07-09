@@ -13,10 +13,9 @@ function errhandle(error, data,res){
     } else if(data === null || data.length === 0){
 		res.send({});
     } else res.json(data);
-}
+};
 
 router.post('/feedsByIndex', function(req,res){
-	c(req)
     var query = {};
     if (req.body.parent && req.body.parentVal){
 		query[req.body.parent] = req.body.parentVal;
@@ -40,14 +39,14 @@ router.post('/group', function(req,res){
     query = {group_id : req.body.group_id};
     exclude = {_id : 0, __v : 0, "group_devices._id" : 0, "group_devices.device_sensors._id" : 0};
     db.findOne(GroupModel,query,exclude,(data,err) => errhandle(err,data,res));		
-})
+});
 	
 router.post('/createGroup', function(req,res){
     var instance = new GroupModel();	
     instance.group_id = req.body.group_id;
     instance.group_devices = req.body.group_devices;
     db.save(instance, (err,data) => errhandle(err,data,res));	
-})
+});
 
 //users
 var UserModel = require('../models/userModel');
@@ -89,6 +88,21 @@ router.post('/getGraph', function(req,res){
     query = {username : req.user.username};
     db.findOne(UserModel,query,exclude, (data,err) =>  errhandle(err,data.graphs,res));
 });
+
+//db.find(FeedModel,{timeS:{$lt:1529919363857}},{},(data,err) => ttt(data));
+//function ttt (rec){    
+//   c(rec)
+//}
+
+//FeedModel.remove({timeS:{$lt:1529919363857}} , function(err) {
+//    if (!err) {
+//            c('notification!')
+//    }
+//    else {
+//            c('error');
+//    }
+//});
+//db.remove(FeedModel,{timeS:{$lt:1529919363899}},(data,err)=>ttt(data));
 //    db.findOne(GroupModel,{group_id:'fact'},{},(data,err) => ttt(data));		
 //    function ttt (group){
 //    group.group_devices.push({"device_id":"pi0-16","device_name":"pi0-16","device_sensors":[{"sensor_id":"am2302H"},{"sensor_id":"am2302T"}]})

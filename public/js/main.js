@@ -14,7 +14,7 @@ var conf = {
     }, mounted () {
 	    c('mounted conf')
 	    vue.$data.isLoader=false;
-    }, template : `<div>Configuration<div>`
+    }, template : `<div><router-view></router-view><div>`
 };
 var temp=[{"_id":"5b28cbde5ed4d5001ee77f43","time":"1529400282187","timeS":"1529400286195","device_id":"pi0-10","sensor_id":"am2302H","data":"88.4"},
 {"_id":"5b28cbff5ed4d5001ee77f44","time":"1529400317021","timeS":"1529400319032","device_id":"pi0-10","sensor_id":"am2302T","data":"20.6"},
@@ -78,326 +78,400 @@ var temp=[{"_id":"5b28cbde5ed4d5001ee77f43","time":"1529400282187","timeS":"1529
 {"_id":"5b28d2b95ed4d5001ee77f7e","time":"1529402039144","timeS":"1529402041062","device_id":"pi0-10","sensor_id":"am2302T","data":"20.9"},
 {"_id":"5b28d2bb5ed4d5001ee77f7f","time":"1529402039144","timeS":"1529402043348","device_id":"pi0-10","sensor_id":"am2302H","data":"87.5"}];
 var confCharts = {
-	data () {
-		return {
-			activeTab:0,
-			selectChart : vue.selectChart,
-			chartFields:[
-				{'field':'name',"type":"text","required":"false","default":""},
-				{'field':'group_name',"type":"select","required":"true","default":""},
-				{'field':'device_id',"type":"select","required":"true","default":""},
-				{'field':'sensor_id',"type":"select","required":"true","default":""},
-				{'field':'interval',"type":"time","required":"true","default":1800},
-				{'field':'chart',"type":"select","required":"true","default":vue.selectChart[0]},
-				{'field':'color',"type":"color","default":"#00a600"},
-				{'field':'min',"type":"number","default":""},
-				{'field':'minColor',"type":"color","default":"#0000FF"},
-				{'field':'max',"type":"number"},
-				{'field':'maxColor',"type":"color","default":"#ff0000"}
-			],
-			dashConfig : {},
-			dashConfigHist : [],
-			selectDash : [],
-			selectGroups : this.getGroups(),
-			isMounted:false
-		}
-    },computed: {
-	}, created () {
+    data () {
+	return {
+	    activeTab:1,
+	    selectChart : vue.selectChart,
+	    chartFields:[
+		{'field':'name',"type":"text","required":"false","default":""},
+		{'field':'group_name',"type":"select","required":"true","default":""},
+		{'field':'device_id',"type":"select","required":"true","default":""},
+		{'field':'sensor_id',"type":"select","required":"true","default":""},
+		{'field':'interval',"type":"time","required":"true","default":1800},
+		{'field':'chart',"type":"select","required":"true","default":vue.selectChart[0]},
+		{'field':'color',"type":"color","default":"#00a600"},
+		{'field':'min',"type":"number","default":""},
+		{'field':'minColor',"type":"color","default":"#0000FF"},
+		{'field':'max',"type":"number"},
+		{'field':'maxColor',"type":"color","default":"#ff0000"}
+		],
+		navBtns :{
+			'dash':{'msg':'Select existing Dashboard','buttons':[{'button':'del','status':false},{'button':'right','status':true}]},
+			'device':{'msg':'Choose Group, Device and Sensor to monitor','buttons':[{'button':'left','status':true},{'button':'right','status':false}]},
+			'chart':{'msg':'Select Chart properties','buttons':[{'button':'left','status':true},{'button':'right','status':true}]},
+			'alert':{'msg':'Configure Alerts','buttons':[{'button':'left','status':true},{'button':'right','status':true}]},
+			'view':{'msg':'Save or go to previous steps','buttons':[{'button':'left','status':true},{'button':'save','status':true}]}
+		},
+	    dashColumns: [{
+			field: 'name',
+			label: 'Dashboard',
+			width: '40',
+			sortable:true,
+			centered : true
+	    }],		
+	    group : '',
+	    groupColumns: [{
+		field: 'group_name',
+		label: 'Group',
+		width: '40',
+		sortable:true,
+		centered : true
+	    }],
+	    selectGroups : '',
+	    devices : '',
+	    deviceColumns: [{
+		field: 'device_name',
+		label: 'Device',
+		width: '40',
+		sortable:true,
+		centered: true,
+	    }],
+	    sensors : '',
+	    sensorColumns: [{
+		field: 'sensor_id',
+		label: 'Sensor',
+		width: '40',
+		sortable:true,
+		centered: true,
+	    }],
+	    selectSensors : '',
+	    dashConfig : {},
+	    dashConfigHist : [],
+	    selectDash : [],
+	    selectGroups : this.getGroups(),
+	    isMounted:false
+	}
+    }, computed: {
+    }, created () {
 		c('created confCharts');
 		vue.$data.isLoader=true;
 		addScript({"path":"./js/Chart.min.js","name":"Chart.min.js"},function(){
-		});
+	});
     }, mounted () {
-		var t=this;
-		t.$nextTick(function () {
-			t.$data.dashConfig = t.getDefault();
-			t.$data.isMounted=true;
-			t.$data.selectDash=this.getDash();
-			c('mounted confCharts');
-			vue.$data.isLoader=false;
-		});  
+		Vue.component('navlevel', navLevel);
+	var t=this;
+	t.$nextTick(function () {
+	    t.$data.dashConfig = t.getDefault();
+	    t.$data.isMounted=true;
+	    t.$data.selectDash=this.getDash();
+	    c('mounted confCharts');
+	    vue.$data.isLoader=false;
+	});  
     }, methods : {
-		device(){
-			var d =this.$data;
-			var x =  d.selectGroups.find(o=>o.group_name===d.dashConfig.group_name) 
-			return x!==undefined ? x.group_devices : [{"device_id":""}];
-		}, sensor(){
-			var t=this;
-			var d =t.$data;
-			var x = t.device().find(o=>o.device_id===d.dashConfig.device_id);
-			return x!==undefined ? x.device_sensors : {};
-		}, required (){
-			f=this.$data.chartFields.filter(o => o.required === "true" )
-			this.$data.dashConfig.find
-			e=f.map(o=> 
-				this.$data.dashConfig[o.field] !==undefined && ['',null,undefined].indexOf(this.$data.dashConfig[o.field])===-1
-			);
-			return e.indexOf(false)!==-1  ? false : true;
-		}, getDefault(){
-			d = this.$data;
-			var n={};
-			d.chartFields.map(o=>{
-				n[o.field]=o.default ? o.default : "";
-			});	
-			return n;
-		}, getGroups (){
-			t = this;
-			if (!vue.gs('groups')){
-			vue.getData({"path":"query/groups"}, function(err,
-			){
-				if(res){
-					vue.ls(['groups',JSON.stringify(res)]);
-					t.selectGroups=res;
-				} else {
-					c(err);
-				}
-			});
-			} else{
-			return JSON.parse(vue.gs('groups'));
-			};
-		}, getDash  () {
-			var n=[this.getDefault()];
-			return vue.gs('dash') ? n.concat(JSON.parse(vue.gs('dash'))) : n;
-		}, dashLoad (){
-			vue.tstS('dashload')
-			if (vue.el('selectDash')===null || vue.el('selectDash').value===''){
-				// this.$data.dashConfig=this.$data.dashDefault;
-				this.destroyChart();
+	reset(m){
+		var d=this.$data;
+	},
+	required (){
+		var d = this.$data
+		var f=d.chartFields.filter(o => o.required === "true" )
+		if(d.group.group_name && d.devices.device_name && d.sensors.sensor_id){
+			t.navBtns.device.buttons.map(o=>o.status=true)
+		} else{
+			t.navBtns.device.buttons.find(o=>o.button==='right').status=false;
+		}
+		var e=f.map(o=> 
+			d.dashConfig[o.field] !==undefined && ['',null,undefined].indexOf(d.dashConfig[o.field])===-1
+		);
+		return e.indexOf(false)!==-1  ? false : true;
+	}, getDefault(){
+		d = this.$data;
+		var n={};
+		d.chartFields.map(o=>{
+			n[o.field]=o.default ? o.default : "";
+		});	
+		return n;
+	}, getGroups (){
+		t = this;
+		if (!vue.gs('groups')){
+		vue.getData({"path":"query/groups"}, function(err,
+		){
+			if(res){
+				vue.ls(['groups',JSON.stringify(res)]);
+				t.selectGroups=res;
 			} else {
-				this.$data.dashConfig=vue.el('selectDash').value;
-			};
-		}, saveDash  () {
-			var t = this;
-			var data = t.$data.dashConfig;
-			data.name = data.name || (data.group_name+data.device_id+data.sensor_id);
-			vue.getData({"path":"query/saveGraph","graph=":data}, function(err,res){
-				if(res){
-					vue.tstS('Saved');
-					var d = vue.gs('dash') ? JSON.parse(vue.gs('dash')) : [];
-					var pos = d.findIndex(o => o.name === data.name);
-					if (pos!=-1){
-						d[pos]=data;	
-					} else{
-						d.push(data);
-					};
-					vue.ls(['dash',JSON.stringify(d)]);
-					t.$data.selectDash=t.getDash();
-					t.hist('s');
-				} else {
-					vue.tstW('dashboard not saved, see log');
-					c(err);
-				}
-			});
-		},	hist(e){
-			var d = this.$data;
-			if (e==='s'){
-				d.dashConfigHist[1]=(JSON.stringify(d.dashConfig))
+				c(err);
 			}
-			else{
-				if(d.dashConfigHist.length===2){
-					d.selectDash[d.dashConfigHist[0]]=JSON.parse(d.dashConfigHist[1]);
-				}
-				d.dashConfigHist[0]=(d.selectDash.findIndex(o=>o==e))
-				d.dashConfigHist[1]=(JSON.stringify(e))
-			}
-		}, changeChart (){	    
-			vue.$data.isLoader=true;
-			var t=this;
-			var d = t.$data.dashConfig;
-			if(t.required){
-			var dt= Date.now();
-			// t.showChart(temp)
-			vue.getData({"path":"query/feedsByIndex","parent":"device_id","parentVal":d.device_id,
-				"from":(dt-d.interval*1000),"to":dt}
-			, function(err,res){
-				vue.$data.isLoader=false;
-				if (res && res.length>0){
-						t.showChart(res);
-				} else if (res){
-					t.destroyChart();
-					vue.tstW('No data found');
-				} else if (err){
-					c(err);
-				}
-			});
-			} else{
-				vue.tstW('not enough parameters');
-			};
-		}, destroyChart (){
-			if (mainChart && vue.el("mainChart")){mainChart.destroy();vue.el("mainChart").innerHTML="";}; 
-		}, showChart (msg){
-			vue.$data.isLoader=true;
-			var datasets=[];
-			var ddd = this.$data.dashConfig;
-			c(ddd)
-			var dataset={label:ddd.group_name+'-'+ddd.device_id+'-'+ddd.sensor_id,
-			borderWidth:1};	
-			c(dataset);
-			t.sensor().map( o=> {
-				c(o.sensor_id)
-				var x = msg.filter(rr => rr.sensor_id ===o.sensor_id);
-				c(x);
-				var dataset={label:ddd.group_name+'-'+ddd.device_id+'-'+o.sensor_id, borderWidth:1};
-				dataset.labels = [];
-				dataset.data = [];
-				dataset.dataColor = [];
-				if (['pie','doughnut','map'].indexOf(dataset.type) ===-1){
-					c(x)
-					x.map(ox => {
-						d = new Date(o.timeS); // The 0
-						dataset.labels.push(moment(d))
-						dataset.data.push(ox.data);
-							if(ddd.min !=="" && ox.data<ddd.min){
-								dataset.dataColor.push(ddd.minColor);
-							} else if(ddd.max !=="" && ox.data>ddd.max){
-								dataset.dataColor.push(ddd.maxColor);
-							} else{
-								dataset.dataColor.push(ddd.color||'black');
-							}
-						})
-				} else{
-					if(ddd.min !==""){
-						dataset.dataColor.push(ddd.minColor)
-						var m = x.filter(({data}) => data < ddd.min).length;
-						dataset.data.push(m);
-						dataset.labels.push('min-'+m||0);
-					}
-					if(ddd.max !==""){
-						dataset.dataColor.push(ddd.maxColor)
-						var m = x.filter(({data}) => data > ddd.max).length;
-						dataset.data.push(m);
-						labels.push('max-'+m||0)
-					}
-					var m = x.length - (data[0]||0)-(data[1]||0);
-					dataset.dataColor.push(ddd.color);
-					dataset.data.push(m);
-					dataset.labels.push('ok-'+m||0);
-					dataset.labels.push('total-'+msg.length);
-				}
-				dataset.pointBackgroundColor = dataset.dataColor,
-				dataset.backgroundColor =dataset.dataColor,
-				dataset.fillColors =dataset.dataColor,
-				datasets.push(dataset)
-				c(datasets)
-				c(dataset)
-			});
-			c('destory');
-			c(datasets)
+		});
+		} else{
+		return JSON.parse(vue.gs('groups'));
+		};
+	}, getDash  () {
+		var n=[this.getDefault()];
+		return vue.gs('dash') ? n.concat(JSON.parse(vue.gs('dash'))) : n;
+	}, dashLoad (){
+		vue.tstS('dashload')
+		if (vue.el('selectDash')===null || vue.el('selectDash').value===''){
+			// this.$data.dashConfig=this.$data.dashDefault;
 			this.destroyChart();
-			mainChart = new Chart( vue.el('mainChart').getContext('2d'), {
-			type: ddd.chart ? ddd.chart : this.$data.selectChart[0],
-			data: {
-				labels: datasets[0].labels,
-				datasets: datasets
-			}, options: {
-				responsive: true,
-				legend: {
-				labels: {
-					fontColor: "black",
-					fontSize: 24
-				}
-				},
-				scales: {
-					yAxes: [{
-						ticks: {
-						beginAtZero: true
-						}
-					}],
-					xAxes: [{
-						ticks: {
-							fontColor: "black",
-							fontSize: 24,
-							beginAtZero: true
-						}
-					}]
-				}
+		} else {
+			this.$data.dashConfig=vue.el('selectDash').value;
+		};
+	}, saveDash  () {
+		var t = this;
+		var data = t.$data.dashConfig;
+		data.name = data.name || (data.group_name+data.device_id+data.sensor_id);
+		vue.getData({"path":"query/saveGraph","graph=":data}, function(err,res){
+			if(res){
+				vue.tstS('Saved');
+				var d = vue.gs('dash') ? JSON.parse(vue.gs('dash')) : [];
+				var pos = d.findIndex(o => o.name === data.name);
+				if (pos!=-1){
+					d[pos]=data;	
+				} else{
+					d.push(data);
+				};
+				vue.ls(['dash',JSON.stringify(d)]);
+				t.$data.selectDash=t.getDash();
+				t.hist('s');
+			} else {
+				vue.tstW('dashboard not saved, see log');
+				c(err);
 			}
-			});
+		});
+	},	hist(e){
+		var d = this.$data;
+		if (e==='s'){
+			d.dashConfigHist[1]=(JSON.stringify(d.dashConfig))
+		}
+		else{
+			if(d.dashConfigHist.length===2){
+				d.selectDash[d.dashConfigHist[0]]=JSON.parse(d.dashConfigHist[1]);
+			}
+			d.dashConfigHist[0]=(d.selectDash.findIndex(o=>o==e))
+			d.dashConfigHist[1]=(JSON.stringify(e))
+		}
+	}, changeChart (){	    
+		vue.$data.isLoader=true;
+		var t=this;
+		var d = t.$data.dashConfig;
+		if(t.required){
+		var dt= Date.now();
+		// t.showChart(temp)
+		vue.getData({"path":"query/feedsByIndex","parent":"device_id","parentVal":d.device_id,
+			"from":(dt-d.interval*1000),"to":dt}
+		, function(err,res){
 			vue.$data.isLoader=false;
-		},changeTab : function (){
-			tab = this.$data.activeTab;
-			if(tab===4){
-				this.changeChart();
-			} else if (tab===5){
-				this.saveDash();
+			if (res && res.length>0){
+					t.showChart(res);
+			} else if (res){
+				t.destroyChart();
+				vue.tstW('No data found');
+			} else if (err){
+				c(err);
+			}
+		});
+		} else{
+			vue.tstW('not enough parameters');
+		};
+	}, destroyChart (){
+		if (mainChart && vue.el("mainChart")){mainChart.destroy();vue.el("mainChart").innerHTML="";}; 
+	}, showChart (msg){
+		var t = this;
+		vue.$data.isLoader=true;
+		var datasets=[];
+		var d = this.$data;
+		var ddd = d.dashConfig;
+		// c(ddd)
+		var dataset={label:ddd.group_name+'-'+ddd.device_id+'-'+ddd.sensor_id,
+		borderWidth:1};	
+		// c(dataset);
+		var sensor = d.devices.device_sensors;
+		sensor.map( o=> {
+			c(o.sensor_id)
+			var x = msg.filter(rr => rr.sensor_id ===o.sensor_id);
+			c(x);
+			var dataset={label:ddd.group_name+'-'+ddd.device_id+'-'+o.sensor_id, borderWidth:1};
+			dataset.labels = [];
+			dataset.data = [];
+			dataset.dataColor = [];
+			if (['pie','doughnut','map'].indexOf(dataset.type) ===-1){
+				c(x)
+				x.map(ox => {
+					d = new Date(o.timeS); // The 0
+					dataset.labels.push(moment(d))
+					dataset.data.push(ox.data);
+						if(ddd.min !=="" && ox.data<ddd.min){
+							dataset.dataColor.push(ddd.minColor);
+						} else if(ddd.max !=="" && ox.data>ddd.max){
+							dataset.dataColor.push(ddd.maxColor);
+						} else{
+							dataset.dataColor.push(ddd.color||'black');
+						}
+					})
+			} else{
+				if(ddd.min !==""){
+					dataset.dataColor.push(ddd.minColor)
+					var m = x.filter(({data}) => data < ddd.min).length;
+					dataset.data.push(m);
+					dataset.labels.push('min-'+m||0);
+				}
+				if(ddd.max !==""){
+					dataset.dataColor.push(ddd.maxColor)
+					var m = x.filter(({data}) => data > ddd.max).length;
+					dataset.data.push(m);
+					labels.push('max-'+m||0)
+				}
+				var m = x.length - (data[0]||0)-(data[1]||0);
+				dataset.dataColor.push(ddd.color);
+				dataset.data.push(m);
+				dataset.labels.push('ok-'+m||0);
+				dataset.labels.push('total-'+msg.length);
+			}
+			dataset.pointBackgroundColor = dataset.dataColor,
+			dataset.backgroundColor =dataset.dataColor,
+			datasets.push(dataset)
+			c(datasets)
+			c(dataset)
+		});
+		c('destory');
+		c(datasets)
+		this.destroyChart();
+		mainChart = new Chart( vue.el('mainChart').getContext('2d'), {
+		type: ddd.chart ? ddd.chart : this.$data.selectChart[0],
+		data: {
+			labels: datasets[0].labels,
+			datasets: datasets
+		}, options: {
+			responsive: true,
+			legend: {
+			labels: {
+				fontColor: "black",
+				fontSize: 24
+			}
+			},
+			scales: {
+				yAxes: [{
+					ticks: {
+					beginAtZero: true
+					}
+				}],
+				xAxes: [{
+					ticks: {
+						fontColor: "black",
+						fontSize: 24,
+						beginAtZero: true
+					}
+				}]
 			}
 		}
-    }, template :
-	`<div class="tile is-ancestor">
+		});
+		vue.$data.isLoader=false;
+	}, changeTab : function (){
+		tab = this.$data.activeTab;
+		if(d.activeTab===4){
+			d.dashConfig.group_name=d.group.group_name;
+			d.dashConfig.device_id=d.devices.device_id;
+			d.dashConfig.sensor_id=d.sensors.sensor_id;
+			this.changeChart();
+		}
+	},compEvent : function(data){
+			if(data==='left'){
+				this.$data.activeTab--;
+			} else if(data=='right'){
+				this.$data.activeTab++;
+			} else if(data=='save'){
+				this.saveDash();
+			} else if(data=='del'){
+				vue.tstS('del')
+			}
+		}
+	},
+	watch : {
+		dashConfig(){
+			var t = this ;
+			if(t.dashConfig.name!==""){
+				t.navBtns.dash.buttons.map(o=>o.status=true)
+			} else{
+				t.navBtns.dash.buttons.find(o=>o.button==='del').status=false;
+			}
+				t.group=t.selectGroups.find(o=>o.group_name===t.dashConfig.group_name)||'';
+				c(t.group)
+			if (t.group!==undefined && t.group.group_devices!==undefined){
+				t.devices=t.group.group_devices.find(o=>o.device_name===t.dashConfig.device_id)||'';
+			}
+			if (t.devices!=''){
+				t.sensors=t.devices.device_sensors.find(o=>o.sensor_id===t.dashConfig.sensor_id)||'';
+			}
+		}, group(){
+			c('group')
+			var d=this.$data;
+			d.devices='';
+		}, devices(){
+			c('dev')
+			var d=this.$data;
+			d.sensors=''
+		}
+	},
+	template :
+	`<div>
 		<b-tabs type="is-boxed" v-model="activeTab" @change="changeTab()" v-if="isMounted">
-			<b-tab-item  class="is-dark">
-			<template  slot="header">
-                <b-icon icon="information-outline"></b-icon>
-                <span > Dashboards <b-tag rounded> {{selectDash.length-1}} </b-tag> </span>
-            </template>
-				<b-field label="Dashboard">
-					<b-select id="selectDash" v-model="dashConfig" @input="hist">
-						<option
-							v-for="o in selectDash"
-							:value="o">
-							{{o.name}}
-					</option>
-				</b-select>
-				</b-field>
-				<b-field label="Name">
-					<b-input v-model="dashConfig.name">{{dashConfig.name}}</b-input>
-				</b-field>
-				<p class="control">
-				<button class="button is-danger is-medium " v-bind:disabled="!required()" id="saveDash" @click.prevent="saveDash">
-				<b-icon icon="delete"></b-icon></button></button></p>
-			</b-tab-item>
-			<b-tab-item label="Groups" icon="group">
-			<b-field grouped>
-			<b-field label="Group" class="column is-3" type="is-warning">
-				<b-select id="group_name" v-model="dashConfig.group_name">
-					<option selected></option>
-					<option
-						v-for="o in selectGroups"
-						:value="o.group_name">
-						{{o.group_name}}
-					</option>
-				</b-select>
-			</b-field>
-			<b-field label="Device" class="column is-3" type="is-warning">
-				<b-select id="device_id" v-model="dashConfig.device_id">
-					<option v-if="dashConfig.group_name===''"></option>
-					<option v-else v-for="o in device()"
-						:value="o.device_id">	
-						{{o.device_name}}
-					</option>
-				</b-select>
-			</b-field>
-			<b-field label="Sensor" class="column is-4" type="is-warning">
-				<b-select id="sensor_id" v-model="dashConfig.sensor_id">
-					<option v-if="dashConfig.device_id===''"></option>
-					<option v-else=""
-						v-for="o in sensor()"
-						:value="o.sensor_id">	
-						{{o.sensor_id}}
-					</option>
-				</b-select>
-			</b-field>
-			</b-field>
-			</b-tab-item>
-			<b-tab-item label="Chart" icon="finance">
+		<b-tab-item label="speedometer" class="is-dark">
+			<template slot="header">
+				<b-icon icon="speedometer"></b-icon>
+				<span> Dashboards <b-tag rounded> {{selectDash.length - 1}} </b-tag> </span>
+			</template>
+			<navlevel v-bind:nav="navBtns.dash" v-on:compEvent="compEvent($event)"></navlevel>
+				<b-table bordered narrowed class="column is-4"
+				 :data="selectDash"
+				 :columns="dashColumns"
+				 focusable
+				 :selected.sync="dashConfig"
+				 paginated
+				 :per-page="10"
+				 ></b-table>
+		</b-tab-item>
+		<b-tab-item label="Devices" icon="group" :disabled="!required()" > 
+			<navlevel v-bind:nav="navBtns.device" v-on:compEvent="compEvent($event)"></navlevel>
 			<section class="columns">
+			<b-table bordered narrowed class="column is-4"
+				 :data="selectGroups"
+				 :columns="groupColumns"
+				 focusable
+				 :selected.sync="group"
+				 paginated
+				 :per-page="10"
+				 @select="reset('g')"
+				 ></b-table>
+			<b-table bordered narrowed class="column is-4"
+				 :data="group.group_devices"
+				 :columns="deviceColumns"
+				 focusable
+				 :selected.sync="devices"
+				 paginated
+				 :per-page="10"
+				 @select="reset('d')"
+				 >
+			</b-table>
+			<b-table bordered narrowed class="column is-4"
+				 :data="devices.device_sensors"
+				 :columns="sensorColumns"
+				 focusable
+				 :selected.sync="sensors"
+				 paginated
+				 :per-page="10"
+				 ></b-table>
+		</section>
+		</b-tab-item>
+		<b-tab-item label="Chart" icon="finance" :disabled="!required()">
+		<navlevel v-bind:nav="navBtns.chart" v-on:compEvent="compEvent($event)"></navlevel>
+		<section class="columns">
 			<b-field grouped>
 			<b-field label="Chart" class="column is-4" type="is-warning">
 				<b-select id="chart" v-model="dashConfig.chart">
-					<option
-						v-for="o in selectChart"
-						:value="o">
-						{{o}}
-					</option>
+				<option
+					v-for="o in selectChart"
+					:value="o">
+					{{o}}
+				</option>
 				</b-select>
 			</b-field>
 			<b-field label="Interval" class="column is-4" type="is-warning">
 				<b-select id="interval" v-model="dashConfig.interval">
-					<option
-						v-for="o in vue.$data.selectInterval"
-						:value="o">
-						{{moment.duration(o,"seconds").humanize()}}
-					</option>
+				<option
+					v-for="o in vue.$data.selectInterval"
+					:value="o">
+					{{moment.duration(o, "seconds").humanize()}}
+				</option>
 				</b-select>
 			</b-field>
 			<b-field label="Color" class="column is-4">
@@ -406,7 +480,7 @@ var confCharts = {
 			</b-field>
 		</section>
 		<section class="columns">
-		<b-field grouped>
+			<b-field grouped>
 			<b-field label="Minimum" class="column is-5">
 				<input type="number" id="min" v-model="dashConfig.min"></input>
 			</b-field>
@@ -416,7 +490,7 @@ var confCharts = {
 			</b-field>
 		</section>
 		<section class="columns">
-		<b-field grouped>
+			<b-field grouped>
 			<b-field label="Maximum" class="column is-5">
 				<input type="number" id="max" v-model="dashConfig.max"></input>
 			</b-field>
@@ -424,228 +498,16 @@ var confCharts = {
 				<input id="maxColor" type="color" v-model="dashConfig.maxColor"></input>
 			</b-field>
 		</section>
-			</b-tab-item>
-			<b-tab-item label="Alerts" icon="alert">
-			</b-tab-item>
-			<b-tab-item icon="eye" :disabled="!required()">
-				<canvas id="mainChart"></canvas>
-			</b-tab-item>
-			<b-tab-item icon="content-save" :disabled="!required()">
-				<canvas id="mainChart"></canvas>
-			</b-tab-item>
-		</b-tabs>	
-	    </div>
-	</div>`
-};
-var confCharts2 = {
-	data () {
-		return {
-			interval : '',
-			chart : '',
-			selectChart : ['','bar','line','map'],
-			dashDefault:{minColor:'#0000FF',maxColor:'#ff0000',chart:'line',interval:604800},
-			dashConfig : {},
-			selectDash : this.getDash(),
-			group : '',
-			selectGroups : this.getGroups(),
-			device : '',
-			selectDevices : '',
-			sensor : '',
-			selectSensors : '',
-			color : '',
-			selectColors : '',
-			min:'',
-			max:'',
-		}
-    }, created () {
-		c('created confCharts');
-		vue.loader(1);
-		addScript({"path":"./js/Chart.min.js","name":"Chart.min.js"},function(){
-		});
-    }, mounted () {
-		this.$nextTick(function () {
-			c('mounted confCharts');
-			vue.loader(0);
-		});  
-    }, methods : {
-		getGroups : function(){
-			t = this;
-			if (!vue.gs('groups')){
-			vue.getData({"path":"query/groups"}, function(err,res){
-				if(res){
-					vue.ls(['groups',JSON.stringify(res)]);
-					t.selectGroups=res;
-				} else {
-				c(err);
-					}
-			});
-			} else{
-			return JSON.parse(vue.gs('groups'));
-			};
-		}, getDash : function () {
-		   return vue.gs('dash') ? JSON.parse(vue.gs('dash')) : [];
-		}, dashLoad : function(){
-			if (vue.el('selectDash')===null || vue.el('selectDash').value===''){
-				this.$data.dashConfig=this.$data.dashDefault;
-				this.destroyChart();
-				return true;
-			} else {
-				
-				return false;
-			};
-		}, saveDash : function () {
-			var t = this;
-			var data = this.$data.dashConfig;
-			if(!data.sensor){vue.showModAlert('No sensors');return;} ;
-			data.name = data.name || (data.group+data.device+data.sensor);
-			if(!data.sensor){
-				vue.showModAlert('No sensors');
-				return;
-			} else{
-				vue.getData({"path":"query/saveGraph","username":"ido","graph":data}, function(err,res){
-				if(res){
-					vue.showModAlert('dashboard saved');
-					var d = t.getDash();
-					var pos = d.findIndex(o => o.name === data.name);
-				if (pos!=-1){
-					d[pos]=data;	
-				} else{
-					d.push(data);
-				};
-				vue.ls(['dash',JSON.stringify(d)]) ;
-				} else {
-					vue.showModAlert('dashboard not saved, see log');
-					c(err);
-				}
-			});
-			}
-		}, getGroup : function(){
-			t  = this;
-			if (!vue.gs('group_'+t.$data.dashConfig.group)){
-			vue.getData({"path":"query/group","group_id":t.$data.dashConfig.group}, function(err,res){
-				if (res){
-				vue.ls(['group_'+t.$data.dashConfig.group,JSON.stringify(res.group_devices)]);
-				t.$data.selectDevices=res.group_devices;
-				}
-			});
-			} else {
-			t.$data.selectDevices = JSON.parse(vue.gs('group_'+t.$data.dashConfig.group));
-			};
-		}, changeDevice : function(){
-			this.$data.selectSensors=this.$data.selectDevices.filter(({device_id}) => device_id === this.$data.dashConfig.device)[0].device_sensors;
-		}, changeChart : function(){	    
-			d = this.$data.dashConfig;
-			if(d.interval && d.sensor){
-			var dt= Date.now();
-			vue.getData({"path":"query/feedsByIndex","index":"sensor","value":d.sensor,
-				"from":dt/1000-d.interval,"to":dt/1000}
-			, function(err,res){
-				if (res && res.length>0){
-				c(res)
-				t.showChart(res);
-				} else if ( res && res.length===0){
-				vue.showModAlert('No data found');
-				} else if (err){
-				c(err);
-				}
-			});
-			};
-		}, destroyChart : function(){
-			if (mainChart && vue.el("mainChart")){mainChart.destroy(); c('main');vue.el("mainChart").innerHTML="";}; 
-		}, showChart : function(msg){
-			var ddd = this.$data.dashConfig;
-			var labels = [];
-			var data = [];
-			var dataColor = [];
-			var type = ddd.chart ? ddd.chart : this.$data.selectChart[0];
-			// console.log(msg," ido")
-			msg.map(o => {
-				d = new Date(o.time*1000); // The 0
-				labels.push(String(d.getHours()).padStart(2,"0")+':'+String(d.getMinutes()).padStart(2,"0")+':'+String(d.getSeconds()).padStart(2,"0"));
-				data.push(o.data);
-				if(o.data<ddd.min){
-					dataColor.push(ddd.minColor);
-				} else if(o.data>ddd.max){
-					dataColor.push(ddd.maxColor);
-				} else{
-					dataColor.push(ddd.color||'black');
-				};
-			});
-			this.destroyChart();
-			mainChart = new Chart( vue.el('mainChart').getContext('2d'), {
-			type: type,
-			data: {
-				labels: labels,
-				datasets: [{
-					type: type,
-					fill:false,
-					label: ddd.group+'-'+ddd.device+'-'+ddd.sensor,
-					data: data,
-					pointBackgroundColor: dataColor,
-					backgroundColor : dataColor,
-					fillColors : dataColor, 
-					borderWidth: 1
-				}]
-			}, options: {
-				responsive: true,
-				legend: {
-				labels: {
-					fontColor: "black",
-					fontSize: 36
-				}
-				},
-				scales: {
-				yAxes: [{
-					ticks: {
-					beginAtZero: true
-					}
-				}],
-				xAxes: [{
-					ticks: {
-					fontColor: "black",
-					fontSize: 24,
-					stepSize: ddd.interval,
-					beginAtZero: true
-					}
-				}]
-				}
-			}
-			});
-		}
-    }, template :
-	`<div class="appMain">
-	    <div class="mainMenu">
-		<div><div><span v-html="icon('dashboard')"></span><label>dashboard</label></div><select id="selectDash" v-model="dashConfig" ><option selected value></option><option v-for="i in selectDash" :value="i">{{i.name}}</option></select></div>
-		<div><div><span v-html="icon('text-size')"></span><label>name</label></div><input id="nameDash" type="text" v-model="dashConfig.name"></input></div>
-		<div><div><span v-html="icon('arrow-down')"></span><label>save</label></div><button v-bind:disabled="!dashConfig.sensor" id="saveDash" @click.prevent="saveDash"><span v-html="icon('arrow-down')"></button></div>
-		<div><div><span v-html="icon('package')"></span><label>groups</label></div>
-		    <select v-if="dashLoad()" id="selectGroup" v-model="dashConfig.group" @change="getGroup()"><option selected value></option><option v-for="i in selectGroups" :value="i.group_id">{{i.group_id}}</option></select>
-		    <input v-else id="selectGroup" v-model="dashConfig.group" readonly></input>
-		</div>
-		<div><div><span v-html="icon('device-mobile')"></span><label>devices</label></div>
-		    <select v-if="dashLoad()" id="selectDevice" v-model="dashConfig.device" @change="changeDevice()"><option selected value></option><option v-for="i in selectDevices" :value="i.device_id">{{i.device_id}}</option></select>
-		    <input v-else id="selectDevice" v-model="dashConfig.device" readonly></input>
-		</div>
-		<div><div><span v-html="icon('pulse')"></span><label>sensors</label></div>
-		    <select v-if="dashLoad()" id="selectSensor" v-model="dashConfig.sensor" @change="changeChart()"><option selected value></option><option v-for="i in selectSensors" :value="i.sensor_id">{{i.sensor_id}}</option></select>
-		    <input v-else id="selectSensor" v-model="dashConfig.sensor" readonly>{{changeChart()}}</input>
-		</div>	
-		<div><div><span v-html="icon('calendar')"></span><label>from</label></div><input id="fromSelect" type="date" placeholder="from"></input></div>
-		<div><div><span v-html="icon('calendar')"></span><label>to</label></div><input id="toSelect" type="date" placeholder="to"></input></div>
-		<div><div><span v-html="icon('clock')"></span><label>interval</label></div><select id="vue.$data.selectInterval" v-model="dashConfig.interval" @change="changeChart()"><option v-for="i in vue.$data.selectInterval" :value="i">{{moment.duration(i,"seconds").humanize()}}</option></select></div>	
-		<div><div><span v-html="icon('graph')"></span><label>chart</label></div><select id="selectChart" v-model="dashConfig.chart" @change="changeChart()"><option v-for="i in selectChart" :value="i">{{i}}</option></select></div>
-		<div><div><span v-html="icon('pencil')"></span><label>chart color</label></div><input id="selectColor" type="color" v-model="dashConfig.color"></input></div>
-		<div></div>
-		<div><div><span v-html="icon('dash')"></span><label>minimum</label></div><input id="min" type="number" v-model="dashConfig.min"></input></div>
-		<div><div><span v-html="icon('pencil')"></span><label>min color</label></div><input id="minColor" type="color" v-model="dashConfig.minColor"></input></div>
-		<div></div>
-		<div><div><span v-html="icon('plus-small')"></span><label>maximum</label></div><input id="min" type="number" v-model="dashConfig.max"></input></div>
-		<div><div><span v-html="icon('pencil')"></span><label>max color</label></div><input id="maxColor" type="color" v-model="dashConfig.maxColor"></input></div>
-		<div></div>
-	    </div>
-	    <div class="mainMain">
+		</b-tab-item>
+		<b-tab-item label="Alerts" icon="alert"  :disabled="!required()">
+		<navlevel v-bind:nav="navBtns.alert" v-on:compEvent="compEvent($event)"></navlevel>
+		</b-tab-item>
+		<b-tab-item label="View" icon="eye" :disabled="!required()">
+		<navlevel v-bind:nav="navBtns.view" v-on:compEvent="compEvent($event)"></navlevel>
 		<canvas id="mainChart"></canvas>
-	    </div>
+		</b-tab-item>
+	</b-tabs>	
+	</div>
 	</div>`
 };
 var confGroups = {
@@ -771,7 +633,8 @@ var confUsers = {
 	data () {
 		return {
 			activeTab: 1,
-			user : null,
+			user : {'username':'','name':'','surname':'','email':'','role':[],'graphs':[],'active':true},
+			userDef : {'username':'','name':'','surname':'','email':'','role':[],'graphs':[],'active':true},
 			tabColumns: [{
 				field: 'username',
 				label: 'Username',
@@ -827,12 +690,23 @@ var confUsers = {
 					vue.showModAlert('could not find users');
 				};
 			});
+		}, compEvent : function(data){
+			vue.tstW(data);
+			if(data==='left'){
+				this.$data.activeTab--;
+			} else if(data=='right'){
+				this.$data.activeTab++;
+			} else if(data=='save'){
+				this.saveDash();
+			} else if(data=='del'){
+				vue.tstS('del')
+			}
 		}
 	}, template :
 	`<div>
 		<b-tabs type="is-boxed" v-model="activeTab" @change="if(activeTab===0){user=null}">
 			<b-tab-item label="New" icon="account-plus">
-				<userAdmin v-bind="user"></userAdmin>
+				<userAdmin v-bind:user="userDef" v-on:compEvent="compEvent($event)"></userAdmin>
 			</b-tab-item>
 			<b-tab-item label="Users" icon="account-multiple">
 				<b-table bordered
@@ -840,11 +714,13 @@ var confUsers = {
 					:data="selectUser"
 					:columns="tabColumns"
 					focusable class="column"
-					:selected.sync="user">
+					:selected.sync="user"
+					paginated
+					:per-page="10">
 				</b-table>
 			</b-tab-item>
 			<b-tab-item label="Edit" icon="account-edit" :disabled="user===null">
-				<userAdmin v-bind="user"></userAdmin>
+				<userAdmin v-bind:user="user"></userAdmin>
 			</b-tab-item>
 		</b-tabs>
 	</div>`
@@ -1010,17 +886,6 @@ var dash = {
 		</div>
 	</div>`
 }
-var exit = {
-    created (){
-		vue.loader(1);
-	c('created exit');
-		localStorage.removeItem('user');
-		vue.nav('/');
-    }, mounted () {
-		c('mounted exit')
-		vue.loader(0);
-    }
-};
 var hist = {
 	data () {
 		return {
@@ -1039,7 +904,7 @@ var hist = {
 				sortable : true,
 				centered : true
 			}],
-			selectGroups : '',
+			selectDevices : '',
 			device : '',
 			deviceColumns: [{
 				field: 'device_id',
@@ -1074,8 +939,8 @@ var hist = {
     }, mounted () {
 		this.$nextTick(function () {
 			c('mounted confGroups');			
+			this.getGroups();
 		});  
-		this.getGroups();
     }, methods : {
 		getGroups : function(){
 			t = this;
@@ -1083,7 +948,11 @@ var hist = {
 			vue.getData({"path":"query/groups"}, function(err,res){
 				if(res){
 					vue.ls(['groups',JSON.stringify(res)]);
-					t.$data.selectGroups = res;
+					var x = []
+					x= res.map(o=>x.concat(o.group_devices))
+					c(x)
+					t.$data.selectDevices = x;
+					c(t.$data.selectDevices)
 				} else {
 					c(err);
 				}
@@ -1095,9 +964,10 @@ var hist = {
 		<b-tabs type="is-boxed" v-model="activeTab" @change="">
 			<b-tab-item label="Devices" icon="cellphone-link">
 			<b-table
-				:data="group.group_devices"
+				:data="selectDevices"
 				:columns="deviceColumns"
-				focusable class="column"
+				focusable 
+				class="column"
 				:selected.sync="device">
 			</b-table>
 			</b-tab-item>
@@ -1115,31 +985,40 @@ var hist = {
 var login  = { 
 	path: '/', 
 	name:login,
+	props: true,
 	component: {
 		data : function() {
 			return {
-				username: this.getUser().username,
-				password: this.getUser().username,
-				token: this.getUser().token,
+				username:'',
+				password: '',
+				keep:'yes',
 				err: ''
 			}
-		}, created : function (){
+		}, props:['user']
+		, created : function (){
 			c('created login');
-			if (this.$data.token){vue.nav('/main')}
+			if (this.$props.user.token){
+				vue.getData({"path":"reconnect"}, function(err,res){
+					if (res){
+						vue.nav('/main');
+					};
+				});
+			};
 		}, mounted : function (){ 
 			c('mounted login');
 		}, updated : function (){
 		}, methods : {
-			getUser:function() {
-				var u = vue.gs('user');
-				return u!==null && u ? JSON.parse(u) : {"username": "","password":"","token":""};
-			},
 			login : function () {
 				d = this.$data;
 				if (d.username && d.password){
 					vue.getData({"path":"login","username": this.$data.username,"password":this.$data.password}, function(err,res){
 					if(res.user){
-						vue.ls(['user',JSON.stringify(res.user)]);
+						if (d.keep ==='yes'){
+							vue.ls(['user',JSON.stringify(res.user)]);
+						}else{
+							localStorage.removeItem('user');
+						}
+						vue.$data.user=res.user;
 						vue.nav('/main');
 					} else {
 						vue.tstW('Wrong details')
@@ -1152,82 +1031,78 @@ var login  = {
 			}
 		}, template:
 			`<div >
-			
-			<section class="section">      
-				<form v-if="!token" id="formLogin" class="container column is-4 is-offset-4">
-				    <b-field label="username">
-            <b-input v-model="username" icon="account"></b-input>
-        </b-field>
-		<b-field label="password" >
-            <b-input type="password" icon="lock-question"
-                v-model="password"
-                password-reveal>
-            </b-input>
-        </b-field>
-		<div style="text-align: center" > 
-			<button class="button is-dark is-medium " @click.prevent="login">Login</button>
-		</div>
-		<div style="text-align: center"><img src="./img/logo.png"></img></div>
-		</section>
-			
+				<form v-if="!user.token" id="formLogin" class="">
+				<section class="columns">
+				<div class="container is-offset-4 column is-4">
+				    <b-field label="username" position="is-center">
+						<b-input v-model="username" icon="account"></b-input>
+					</b-field>
+					<b-field label="password" position="is-center">
+						<b-input type="password" icon="lock-question" v-model="password" password-reveal></b-input>
+					</b-field>
+					<b-field label="Keep Logged In" position="is-center">							
+						<b-switch v-model="keep" type="is-danger" true-value="yes" false-value="no"></b-switch>
+						<p class="control"><button class="button is-dark is-medium " @click.prevent="login">Login</button></p>
+					</b-field>
+					<p class="image is-offset-4 column is-4">
+					<img src="./img/logo.png" ></img>
+					</p>
+				</div>
+	
+				</section>
+				</form>
 	</div>` 
 	}
 };
-var user = {
-    data () {
+const navLevel = {
+	data (){
 		return {
-			photo : null,
-			user: vue.isJson(vue.gs('user'),{'user':''}),
-			password: null,
-			passwordNew: null,
-			passwordNewR: null,
-			email: null,
-			err: null
+			rrrrrr:''
 		}
-    }, created (){
-		vue.loader(1);    
-		c('created user')
-    }, mounted () {
-		c('mounted user')
-		vue.loader(0);
-    }, template :`<div><form id="form" class="appLogin">
-	    <div>
-			<label for="username">Username</label>
-			<span v-html="icon('person')"></span>
-	    </div>  
-		<div id="username" name="username" >{{user.username}}</div>
-		<div>
-			<label for="mail">email</label>
-			<span v-html="icon('mail')"></span>
-	    </div>  
-			<input type="email" id="mail" name="mail" v-model="user.email"></input>
-	    <div>Password Change</div>
-	    <div>
-			<label for="password">Old Password</label>
-			<span v-html="icon('lock')"></span>
-	    </div>
-	    <input type="password" v-model="password" id="password" name="password" v-validate="'required'"  />
-	    <div>
-		<label for="password">New Password</label>
-		<span v-html="icon('lock')"></span>
-	    </div>
-	    <input type="password" v-model="passwordNew" id="passwordNew" name="password" v-validate="'required'"  />
-	    <div>
-		<label for="passwordNewR">Repeat Password</label>
-		<span v-html="icon('lock')"></span>
-	    </div>
-	    <input type="password" v-model="passwordNewR" id="passwordNewR" name="password" v-validate="'required'"  />
-	    <div v-if="password!=='' && password!==null && passwordNew!=='' && passwordNew!==null && passwordNew===passwordNewR" >
-		<button @click.prevent="login" class="btn btn-danger">Change</button>
-	    </div>
-	    <div v-if="err" class="danger" id ="err">{{err}}</div>
-	</form></div>`
-};
+	}, props: ['nav']
+	, mounted(){
+		// c(this.$props)
+	}, methods : {
+		showBtn(btn){
+			return this.$props.nav.buttons.findIndex(o=>o.button===btn)!==-1
+		}, disBtn(btn){
+			var x = this.$props.nav.buttons.find(o=>o.button===btn);
+			return x && x.status===false;
+		}, compEvent(d){
+			this.$emit('compEvent',d);
+		}
+	},template:
+		`<nav class="level" >
+			<div class="level-left">
+				<div class="level-item" v-if="showBtn('left')">
+					<button class="button is-link is-medium" @click="compEvent('left')" :disabled="disBtn('left')">
+					<b-icon icon="arrow-left"></b-icon> <p>Back</p></button>
+				</div>
+				<div class="level-item" v-if="showBtn('save')">
+					<button class="button is-dark is-medium" @click.prevent="compEvent('save')" :disabled="disBtn('save')">
+						<b-icon icon="content-save"></b-icon> <p>Save</p></button>
+					</div>
+				<div class="level-item" v-if="showBtn('del')">
+					<button class="button is-danger is-medium" hidden @click="compEvent('del')" :disabled="disBtn('del')">
+					<b-icon icon="delete"></b-icon></button>
+				</div>
+			</div>
+			{{nav.msg}}
+			<div class="level-right">
+				<div class="level-item" v-if="showBtn('right')">
+					<button class="button is-link is-medium" @click="compEvent('right')" :disabled="disBtn('right')">
+					Next<p></p> <b-icon icon="arrow-right"></b-icon></button>    
+				</div>
+			</div>
+		</div>
+	</nav>`
+}
 const userAdmin = {
 		data (){
 			return {
 				pass:'',
 				activeTab: 0,
+				roles:['','device','user','admin'],
 				tabColumns: [
 				{
 					field: 'name',
@@ -1280,23 +1155,49 @@ const userAdmin = {
 				}
 			]
 		}
-		}, props: ['name','email','username','active','admin','graphs']
-		, template: `
+		}, props: ['user']
+		, mounted () {
+			c(this.$props)
+		}, methods :{
+			compEvent(d){
+				this.$emit('compEvent',d);
+			}
+		} , template: `
             <form action="">
 				<section>
+				<nav class="level" >
+					<div class="level-left">
+						<div class="level-item">
+							<button class="button is-dark is-medium" @click.prevent="compEvent('save')">
+								<b-icon icon="content-save"></b-icon></button></button>
+						</div>
+						<div class="level-item">
+							<button class="button is-danger is-medium" @click.prevent="$parent.close()">
+								<b-icon icon="cancel"></b-icon></button></button>
+						</div>
+					</div>
+					<div class="level-right"></div>
+				</nav>
 				<b-tabs type="is-boxed" v-model="activeTab">
 					<b-tab-item label="General" icon="account">
 						<b-field label="Name">
 							<b-input
-								:value="name"
+								:value="user.name"
 								placeholder="name"
+								required>
+							</b-input>
+						</b-field>
+						<b-field label="Name">
+							<b-input
+								:value="user.surname"
+								placeholder="surname"
 								required>
 							</b-input>
 						</b-field>
 						<b-field label="Email">
 							<b-input
 								type="email"
-								:value="email"
+								:value="user.email"
 								placeholder="Your email"
 								required
 								icon="email">
@@ -1304,17 +1205,16 @@ const userAdmin = {
 						</b-field>
 					</b-tab-item>
 					<b-tab-item label="Permissions" icon="account-network">
-						<b-field label="Admin">
-							<b-switch 
-							v-model="admin"
-							true-value="true"
-							false-value="false"
-							type="is-danger">
-							</b-switch>
+						<b-field label="Role" class="">
+							<b-select v-model="user.role">
+								<option v-for="o in roles" :value="o">
+								{{o}}
+								</option>
+							</b-select>
 						</b-field>
 						<b-field label="Active">
 							<b-switch 
-							v-model="active"
+							:value="user.active"
 							true-value="true"
 							false-value="false"
 							type="is-danger">
@@ -1335,7 +1235,7 @@ const userAdmin = {
 				<b-tab-item label="Dashboards" icon="speedometer">
 					<b-table bordered
 					narrowed
-					:data="graphs"
+					:data="user.graphs"
 					:columns="tabColumns"
 					class="column"
 					>
@@ -1343,14 +1243,7 @@ const userAdmin = {
 					</b-tab-item>
 				</b-tabs>
 				</section>
-				<footer class="modal-card-foot">
-				<p class="control">
-					<button class="button is-dark is-medium" @click.prevent="vue.tstW('Save not implemented')">
-					<b-icon icon="content-save"></b-icon></button></button></p>
-				<p class="control">
-					<button class="button is-danger is-medium" @click.prevent="$parent.close()">
-					<b-icon icon="cancel"></b-icon></button></button></p>
-				</footer>
+				<footer class="modal-card-foot"></footer>
 			</div>
 			</form>
 			</section>
@@ -1364,12 +1257,12 @@ const userModal = {
 				keep:'yes',
 				activeTab: 0
 			}
-		}, props: ['email','username']
+		}, props: ['user']
 		, template: `
             <form action="">
                 <div class="modal-card" style="width: auto;min-height:500;min-width:400;">
                     <header class="modal-card-head">
-                        <p class="modal-card-title"><b-icon icon="account"></b-icon>{{username}}</p>
+                        <p class="modal-card-title"><b-icon icon="account"></b-icon>{{user.username}}</p>
                     </header>
                     <section class="modal-card-body">
 						<b-tabs type="is-boxed" v-model="activeTab">
@@ -1377,7 +1270,7 @@ const userModal = {
 			  <b-field label="Email">
                             <b-input
                                 type="email"
-                                :value="email"
+                                :value="user.email"
                                 placeholder="Your email"
                                 required
 								icon="email">
@@ -1430,51 +1323,56 @@ const userModal = {
 }
 var pages = [
 	{ path: 'dash',
-    name: 'Dashboard',
+    name: 'Home',
 	component: dash ,
-    icon : 'speedometer'
-    },
-    { path: 'confCharts',
-    name: 'Charts',
-    component: confCharts,
-     icon : 'finance'
+    icon : 'home',
+	role:''
     },
     { path: 'history',
     name: 'History',
     component: hist,
-     icon : 'view-list'
-    },	
-    { path: 'confUsers',
-    name: 'Users',
-    component: confUsers,
-    icon : 'account-multiple'
-    },
-    { path: 'confGroups',
-    name: 'Groups',
-    component: confGroups,
-    icon : 'group'
+     icon : 'view-list',
+	 role:''
     },
     { path: 'conf',
     name: 'Configuration',
     component: conf,
-    icon : 'wrench'
-    }
+    icon : 'wrench',
+	role:'',
+	children:[
+		{ 	path: 'confCharts',
+			name: 'Dashboards',
+			component: confCharts,
+			icon : 'speedometer',
+			role:''
+		}, { path: 'confUsers',
+			name: 'Users',
+			component: confUsers,
+			icon : 'account-multiple',
+			role:'admin'
+		},{ path: 'confGroups',
+			name: 'Devices',
+			component: confGroups,
+			role:'admin',
+			icon : 'group'
+		}
+	]}
 ];
 var main = { 
 	path : '/main', 
 	name : main,
 	children: pages,
+	props:true,
 	component: {
 		data (){
 			return {
 				navIsActive: false,
 				isUserModal:false,
-				user: vue.isJson(vue.gs('user'),{'user':''})
 			}
-		}, created : function(){
+		},props:['user'], created : function(){
 			c('created main')
 			addScript({"path":"./js/moment.min.js","name":"moment.min.js"},function(){
-				vue.nav('/main/confCharts')
+				vue.nav('/main/dash')
 			});
 		}, mounted () {
 			Vue.component('userModal', userModal);
@@ -1483,9 +1381,9 @@ var main = {
 			changePage (e) {
 				vue.nav('/main/'+e);
 				vue.$data.isLoader=true;
-			},toggleMenu: function () {
+			}, toggleMenu: function () {
 				this.navIsActive = !this.navIsActive
-			}
+			},
 		}, template :
 		`<div>
 		<b-loading :is-full-page="true" :active.sync="vue.$data.isLoader" :can-cancel="false"></b-loading>
@@ -1501,12 +1399,27 @@ var main = {
 		</div>
 		<div id="mainNav" class="navbar-menu is-Danger" :class="{'is-active': navIsActive}">
 			<div class="navbar-start">
-				<div class="nav-item" v-for="rec in pages">
-					<button class="button is-dark is-fullwidth" @click.prevent="vue.nav('/main/'+rec.path)">
-					<b-icon :icon="rec.icon"></b-icon><span>{{rec.name}}</span></button>
+				<div class="nav-item" v-for="rec in pages" v-if="rec.role==='' || rec.role===user.role">
+					<button v-if="!rec.children" class="button is-dark is-fullwidth" @click.prevent="vue.nav('/main/'+rec.path)">
+						<b-icon :icon="rec.icon"></b-icon><span>{{rec.name}}</span>
+					</button>
+					<b-dropdown v-else class="is-dark is-fullwidth">
+						<div class="button is-dark" slot="trigger">
+							<b-icon :icon="rec.icon"></b-icon>
+							<span>{{rec.name}}</span>
+							<b-icon icon="menu-down"></b-icon>
+						</div>
+						<b-dropdown-item class="button is-medium is-dark" v-for="c in rec.children" @click="vue.nav('/main/'+rec.path+'/'+c.path)"
+						v-if="c.role==='' || c.role===user.role">
+						<template>
+							<b-icon :icon="c.icon"></b-icon><span>{{c.name}}</span>
+						</template>
+						</b-dropdown-item>
+					</b-dropdown>
 				</div>
 			</div>
 			<div class="navbar-end">
+			{{user.username}}
 				<button class="nav-item button is-dark is-fullwidth" @click="isUserModal = true"><b-icon icon="account"></b-icon></button>
 				<button class="nav-item button is-dark is-fullwidth" @click="vue.logout"><b-icon icon="logout"></b-icon></button>
 			</div>
@@ -1514,7 +1427,7 @@ var main = {
 		</nav>
 		<router-view></router-view>
 		<b-modal :active.sync="isUserModal" has-modal-card >
-            <userModal v-bind="user"></userModal>
+            <userModal :user="user"></userModal>
         </b-modal>
 	</div>`
 	}

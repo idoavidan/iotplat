@@ -2,7 +2,8 @@ var confUsers = {
 	data () {
 		return {
 			activeTab: 1,
-			user : null,
+			user : {'username':'','name':'','surname':'','email':'','role':[],'graphs':[],'active':true},
+			userDef : {'username':'','name':'','surname':'','email':'','role':[],'graphs':[],'active':true},
 			tabColumns: [{
 				field: 'username',
 				label: 'Username',
@@ -58,12 +59,23 @@ var confUsers = {
 					vue.showModAlert('could not find users');
 				};
 			});
+		}, compEvent : function(data){
+			vue.tstW(data);
+			if(data==='left'){
+				this.$data.activeTab--;
+			} else if(data=='right'){
+				this.$data.activeTab++;
+			} else if(data=='save'){
+				this.saveDash();
+			} else if(data=='del'){
+				vue.tstS('del')
+			}
 		}
 	}, template :
 	`<div>
 		<b-tabs type="is-boxed" v-model="activeTab" @change="if(activeTab===0){user=null}">
 			<b-tab-item label="New" icon="account-plus">
-				<userAdmin v-bind="user"></userAdmin>
+				<userAdmin v-bind:user="userDef" v-on:compEvent="compEvent($event)"></userAdmin>
 			</b-tab-item>
 			<b-tab-item label="Users" icon="account-multiple">
 				<b-table bordered
@@ -71,11 +83,13 @@ var confUsers = {
 					:data="selectUser"
 					:columns="tabColumns"
 					focusable class="column"
-					:selected.sync="user">
+					:selected.sync="user"
+					paginated
+					:per-page="10">
 				</b-table>
 			</b-tab-item>
 			<b-tab-item label="Edit" icon="account-edit" :disabled="user===null">
-				<userAdmin v-bind="user"></userAdmin>
+				<userAdmin v-bind:user="user"></userAdmin>
 			</b-tab-item>
 		</b-tabs>
 	</div>`

@@ -51,7 +51,7 @@ app.post('/login',
             if (err) { return res.json("err"); }
             if (!user) { return res.json("no user"); }
             user.token = uidgen.generateSync();
-            db.save(user, (err,user) => res.json({'user':user}))
+            db.save(user, (err,user) => {res.json({'user':user})})
         });
     }
 );
@@ -64,10 +64,8 @@ function auth(req,res,next){
 	res.status(403).send("Unauthorized");
     }
 }
-app.post('*',auth, (req, res) => {
-});
-app.get('*',auth, (req, res) => {
-});
+app.post('*',auth, (req, res) => {});
+app.get('*',auth, (req, res) => {});
 app.get('/ws', (req, res) => {
     res.sendFile(__dirname+'/public/d.html');
 });
@@ -76,16 +74,35 @@ app.get('*', (req, res) => {
 //    app.on("hello", (client) => console.log("wo"))
     res.sendFile(__dirname+'/public/'+req.path);
 });
-app.use(passport.authenticate('bearer', { session: false }),(req,res,next) => next());
+const perm = {
+    'device':['/feed'],
+    'admin':['/query/users','/query/createGroup','/query/registerUser'],
+    'user':['/reconnect','/query/feedsByIndex','/query/updateUser','/query/groups'
+	,'/query/group','/query/saveGraph','/query/getGraph']
+}
+app.use(passport.authenticate('bearer', { session: false }),(req,res,next) => {
+    if(req.user.role==='device' && perm.device.indexOf(req.path)!==-1){
+	next();
+    } else if(req.user.role==='admin' && perm.admin.concat(perm.user).indexOf(req.path)!==-1){
+	next();
+    } else if ((req.user.role==='' || req.user.role==='user') && perm.user.indexOf(req.path)!==-1 ){
+	next();
+    }else{
+	res.status(403).send("Unauthorized");
+    }
+});
 
-
+app.post('/reconnect',
+    function(req, res, next) {
+	res.status(200).send({'status':'ok'});
+    }
+);
 //device data listener
 var devices = require('./routes/deviceAPI');
 app.use('/feed', devices);
 // TODO mqtt feed
 //query by Index
 var server;
-console.log(process.env)
 if (process.env.PORT){
     server = http.listen(process.env.PORT , function () {
 	c('App listening on port '+ (process.env.PORT));

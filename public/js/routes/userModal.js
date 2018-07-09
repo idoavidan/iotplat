@@ -6,12 +6,12 @@ const userModal = {
 				keep:'yes',
 				activeTab: 0
 			}
-		}, props: ['email','username']
+		}, props: ['user']
 		, template: `
             <form action="">
                 <div class="modal-card" style="width: auto;min-height:500;min-width:400;">
                     <header class="modal-card-head">
-                        <p class="modal-card-title"><b-icon icon="account"></b-icon>{{username}}</p>
+                        <p class="modal-card-title"><b-icon icon="account"></b-icon>{{user.username}}</p>
                     </header>
                     <section class="modal-card-body">
 						<b-tabs type="is-boxed" v-model="activeTab">
@@ -19,7 +19,7 @@ const userModal = {
 			  <b-field label="Email">
                             <b-input
                                 type="email"
-                                :value="email"
+                                :value="user.email"
                                 placeholder="Your email"
                                 required
 								icon="email">
