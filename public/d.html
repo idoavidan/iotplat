@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>Socket.IO chat</title>
+    <title>graph</title>
    
   </head>
   <script src="/socket.io/socket.io.js"></script>
@@ -10,20 +10,99 @@
   <link rel="stylesheet" href="./css/s.css"/>
 
   <script>
-const postBody = (f) => 
+const bigG = 
 {
-  return {      
-		"parent":"device_id",
-		"parentVal":f.device_id,
-		"index": 'sensor_id',
-        "value": f.sensor,
-        "from": f.to - (f.interval * 10) ,
-        "to": f.to,
-        "access_token": '5uU2wtti88oHDqow5UUoPX' 
-      }
-}
-var moment ;
-
+      type: 'line',
+      data: {
+        datasets: [{
+          type: "line",
+          fill:false,
+          label : "Temp",
+          pointBackgroundColor : "black",
+          backgroundColor : "yellow",
+          fillColors : "green",
+          borderWidth: 4
+        }]
+      }, options: {
+        ticks : {
+          source : "labels",
+        },
+        legend : {
+          display : true
+        },
+        hover: {
+          mode: 'nearest',
+          intersect: true
+        },
+        scales: {
+          xAxes: [{
+            type : "time",
+            fontSize : 30
+            }],
+          yAxes: [{
+            display: true,
+            ticks: {
+                suggestedMin: 20,    // minimum will be 0, unless there is a lower value.
+                suggestedMax : 25,
+                stepSize: 2
+            }
+          }]
+        },
+        tooltips: {
+          enabled : false
+        }
+      },
+    };
+const smallG = 
+{
+      type: 'line',
+      data: {
+        datasets: [{
+          type: "line",
+          fill: true,
+          label : "big G",
+          pointBackgroundColor : "black",
+          backgroundColor : [],
+          fillColors : "green",
+          borderWidth: 0.3,
+          showLine : true
+        }]
+      }, options: {
+        ticks : {
+          source : "labels",
+        },
+        animation : {
+          duration : 0
+        },
+        legend : {
+          display : false
+        },
+        responsiveAnimationDuration : 0
+        ,
+        hover: {
+          mode: 'nearest',
+          intersect: true,
+          animationDuration : 0
+        },
+        scales: {
+          xAxes: [{
+            type : "time",
+            }],
+          yAxes: [{
+            display: true,
+            ticks: {
+                // suggestedMin: 0,    // minimum will be 0, unless there is a lower value.
+                // suggestedMax : 40,
+                // stepSize: 2
+            }
+          }]
+        },
+        tooltips: {
+          enabled : false
+        }
+      },
+};
+    
 class Graphs{
   constructor(init,label,data){
     //details
@@ -32,6 +111,7 @@ class Graphs{
     
     //buffer
     this.needBuff = false;
+    this.buffering = false;
     this.data = data;                     
     this.label = label;                   
     this.to = label[label.length -1]      
@@ -42,51 +122,64 @@ class Graphs{
     this.interval = init.interval;
     this.indexFrom = this.label.findIndex(time => time > this.to - this.interval);
     this.indexTo = this.label.length -1;
-
-    this.chart = new Chart(document.getElementById(init.canvas), 
-          this.setConfig(init.canvas,[],[]));
-
+    
+    this.chart = new Chart(document.getElementById(init.canvas), bigG);
+    
     this.updateGraphView();
-
+    
     var nn = init.canvas + "i";
-    var config = this.setConfig(nn,this.data,this.label);
-    const minPoint = Math.min(...this.data);
-    config.options.legend.display = false;
-    config.options.animation = {duration : 0};
-    config.options.hover = {animationDuration : 0};
-    config.options.responsiveAnimationDuration = 0;
-
-    config.options.scales.yAxes = [{ticks: { suggestedMin: minPoint, } }];
-    config.data.datasets[0].borderWidth =  0.1;
+    let config = smallG;
     let colors = []
     for(var i in this.label){
       if(i >= this.indexFrom && i <= this.indexTo){
         colors.push("yellow")
       } else colors.push("black")
     }
-    config.data.datasets[0].pointBackgroundColor = colors
-    config.data.datasets[0].backgroundColor = colors
-    config.data.datasets[0].fill = false;
-    config.data.datasets[0].showLine = false;
-    this.chart2 = new Chart(document.getElementById(nn), config);
-
+    config.data.datasets[0].pointBackgroundColor = colors;
+    config.data.datasets[0].backgroundColor = colors;
+    let canvasi = document.getElementById(nn);
+    let t = this;
+    canvasi.onmousedown = async function(e){
+      e.preventDefault();
+      t.changeViewToPoint(e);
+    }
+    this.chart2 = new Chart(canvasi, config);
+    this.updateBufferView()
   }
   goLive(){
     this.indexTo = this.label.length -1
     this.indexFrom = this.label.findIndex(time => time > this.to - this.interval);
     this.live = true;
     this.updateGraphView();
+    this.updateBufferColors();
+    
   }
   setInterval(e){
     this.interval = e;
     this.goLive();
     this.updateBufferColors();
   }
+  changeViewToPoint(e){
+    var per = (e.x / this.chart2.boxes[2].width );
+      var oldval = this.indexTo - this.indexFrom;
+      var s = Math.floor(oldval / 2);
+      var indexPer = Math.floor(this.label.length * per);
+      this.live = false;
+      this.indexTo = indexPer + s;
+      this.indexFrom = indexPer - s;
+      this.updateBufferColors();
+      this.updateGraphView();
+      if(this.indexFrom < this.label.length / 5){
+        console.log("need buff", )
+        this.needBuff = true;
+      }
+
+  }
   updateBuffer(label,data){
     const bufferLength = label.length;
     const oldexFrom = this.label[this.indexFrom]
     const oldexTo = this.label[this.indexTo]
-
+    
     this.data = [...data,...this.data];
     this.label = [...label,...this.label];
     this.indexFrom = this.label.findIndex(time => time === oldexFrom);
@@ -108,23 +201,21 @@ class Graphs{
   updateBufferView(){
     this.chart2.config.data.datasets.forEach((dataset) => {
         dataset.data = this.data;
-    });   
+      });   
     this.chart2.config.data.labels = this.label;
     this.chart2.update(100);
   }
   updateGraphView(){
     this.chart.config.data.labels = this.label.slice(this.indexFrom,this.indexTo);
     this.chart.config.data.datasets.forEach((dataset) => {
-        dataset.data = this.data.slice(this.indexFrom,this.indexTo);
+      dataset.data = this.data.slice(this.indexFrom,this.indexTo);
     });
-    this.chart.update(100);
+    this.chart.update(800);
   }
-
+  
   moveOnGraph(x){
     const newval = Math.floor((this.indexTo - this.indexFrom) * x);
-    const newto = this.indexTo + newval;
-    const newfrom =  this.indexFrom + newval
-
+    
     if(this.indexFrom < this.label.length / 5){
       console.log("need buff", )
       this.needBuff = true;
@@ -135,75 +226,46 @@ class Graphs{
       console.log("live")
     }else if (this.indexFrom <= 0 && newval < 0){
       console.log("stap");
-    }else if(!this.needBuff){
+    }else if(!this.buffering){
       this.live = false;
       this.indexTo = this.indexTo + newval;
       this.indexFrom = this.indexFrom + newval;
       this.updateBufferColors()
+      this.updateGraphView()
     }
-
-    this.updateGraphView()
   }
-
+  
   pushPoint(x,y){
-      this.label = [...this.label,x];
-      this.data = [...this.data,y];
-      console.log(this.live)
-      if(this.live){
+    this.label = [...this.label,x];
+    this.data = [...this.data,y];
+    console.log(this.live)
+    if(this.live){
         this.indexFrom = this.indexFrom + 1;
         this.indexTo = this.indexTo + 1;
         this.updateGraphView();
+        this.updateBufferView();
+        this.updateBufferColors();
       }
-  } 
-
-  setConfig(name, data,label){
-    return {
-      nameItem: name,
-      type: 'line',
-      data: {
-        labels: label,
-        datasets: [{
-          type: "line",
-          fill:false,
-          label: name,
-          data: data,
-          pointBackgroundColor : "black",
-          backgroundColor : [],
-          fillColors : "green",
-          borderWidth: 4
-        }]
-      }, options: {
-        ticks : {
-          source : "labels",
-        },
-        legend : {
-          display : true
-        },
-        scales: {
-          xAxes: [{
-            type : "time",
-            fontSize : 30
-            }],
-          yAxes: [{
-            display: true,
-            ticks: {
-                suggestedMin: 0,    // minimum will be 0, unless there is a lower value.
-                suggestedMax : 40,
-                stepSize: 2
-            }
-          }]
-        },
-        tooltips: {
-          enabled : false
+    } 
+  }
+  
+const postBody = (f) => 
+  {
+    return {      
+      "parent":"device_id",
+      "parentVal":f.device_id,
+      "index": 'sensor_id',
+          "value": f.sensor,
+          "from": f.to - (f.interval * 10) ,
+          "to": f.to,
+          "access_token": '5uU2wtti88oHDqow5UUoPX' 
         }
-      }
-    };
-  };
-}
+  }
 
-async function postData(url, data) {
-  // Default options are marked with *
-  return fetch(url, {
+  async function postData(url, data) {
+    // Default options are marked with *
+    console.log(data)
+    return fetch(url, {
     body: JSON.stringify(data), // must match 'Content-Type' header
     cache: 'force-cache', // *default, no-cache, reload, force-cache, only-if-cached
     credentials: 'same-origin', // include, same-origin, *omit
@@ -216,7 +278,7 @@ async function postData(url, data) {
     redirect: 'follow', // manual, *follow, error
     referrer: 'no-referrer', // *client, no-referrer
   })
-  .then(response => response.json()) // parses response to JSON
+  .then(response => response.json()); // parses response to JSON
 }
 var g = {};
 
@@ -228,67 +290,52 @@ function goLive(){
   g.goLive();
 }
 
-function push(){
-    g.pushPoint(Date.now(), 25);
-}
-
 window.onload = async function(){
   var initerval = document.getElementById("timeScale").value
   
   var init = {
-    device_id : "pi0-10",
-    sensor : "am2302H",
+    device_id : "pi0-11",
+    sensor : "am2302T",
     interval : initerval,
     canvas : "asd",
     to : Date.now(),
   }
 
   post =  postBody(init);
-  
   data = await postData('query/feedsByIndex', post).catch(error => console.error(error))
   // console.log(data)
   values = data.map(d => d.data);
   labels = data.map(d => d.timeS);
-  
+  console.log("aw")
   g = new Graphs(init,labels,values);
-  
+ 
+
   canvas  = document.getElementById(init.canvas);
   canvas.onmousedown = async function(e){
+    e.preventDefault();
     canvasHalf = canvas.width/2;
     intervalDelta = e.x - canvasHalf;
     x = (1 - ((canvas.width -  intervalDelta) / canvas.width))* 2; 
-    g.moveOnGraph(x);
     
-    if(g.needBuff){
+    if(g.needBuff && !g.buffering){
+      g.buffering = true;
       var p = init;
       p.to = g.label[0];
-      
       data = await postData('query/feedsByIndex', postBody(p)).catch(error => console.error(error))
-      values = data.map(d => d.data);
-      labels = data.map(d => d.timeS);
-      
-      g.updateBuffer(labels,values);
-    }
-  }
-  canvas.onmousemove = async function(e){
-    // var canvas = document.getElementById('asd');
-    // canvasHalf = canvas.width/2;
-    // intervalDelta = e.x - canvasHalf;
-    // x = (1 - ((canvas.width -  intervalDelta) / canvas.width))* 2; 
-    // x = Math.abs(x);
-
-    // var ctx = canvas.getContext('2d');
+      if(data.toString() === "[object Object]"){alert('no more data')}
+      else{
+        values = data.map(d => d.data);
+        labels = data.map(d => d.timeS);
         
-    // ctx.fillStyle = "blue";
-                
-    // var alpha =   x;
-    // ctx.globalAlpha = alpha;       
-            
-    // ctx.fillRect(50, 20, 40, 40);
-    // ctx.globalAlpha = 1;
-    // ctx.restore();
-  }          
+        g.updateBuffer(labels,values);
+      }
+      g.buffering = false;
+      g.needBuff = false;
+    }else{
+      g.moveOnGraph(x);
+    }    
   
+  }
 
   socket = io();
   socket.on('connect', function(){
@@ -307,17 +354,19 @@ window.onload = async function(){
       <canvas  id=asdi width =800 height=50></canvas>
       <select id=timeScale onchange="setInterval(this.value)">
         <optgroup label = "Choose Time Frame">
+            <option value=400000 selected="selected">5m</option>
           <option value=1.8e+6 >30m</option>
           <option value=7.2e+6 >2h</option>
           <option value=1.44e+7 >4h</option>
-          <option value=8.64e+7 selected="selected" >1d</option>
+          <option value=8.64e+7  >1d</option>
           <option value=1.296e+8>3d</option>
         </optgroup>
       </select>
       <button onclick="goLive()">Go To Live</button>      
-      <button onclick="push()">push 25</button>
+      <!-- <button onclick="push()">push 25</button> -->
 
     </div>
   </body>
 </html>
     
+
